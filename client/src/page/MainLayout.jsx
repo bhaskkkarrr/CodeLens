@@ -20,7 +20,7 @@ const MainLayout = () => {
         {/* fine graph-paper grid, like an editor's line/column guides */}
         <div className="absolute inset-0 opacity-[0.07] bg-[linear-gradient(#acc8a2_1px,transparent_1px),linear-gradient(90deg,#acc8a2_1px,transparent_1px)] bg-size-[44px_44px] sm:bg-size-[56px_56px]" />
       </div>
-      <div className="max-w-4xl mx-auto w-full flex justify-between items-center my-4">
+      <div className="max-w-4xl px-5 py-2 mx-auto w-full flex justify-between items-center my-4">
         <NavBar />
       </div>
       <div className="max-w-4xl mx-auto w-full flex flex-col justify-between items-center">
