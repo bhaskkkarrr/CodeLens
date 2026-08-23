@@ -1,0 +1,30 @@
+@import "tailwindcss";
+@theme {
+  --color-hunter-green-50: #f4f7f2;
+  --color-hunter-green-100: #e5ebe0;
+  --color-hunter-green-200: #ccd7c3;
+  --color-hunter-green-300: #a7ba9b;
+  --color-hunter-green-400: #7d986f;
+  --color-hunter-green-500: #5c7a4f;
+  --color-hunter-green-600: #46603b;
+  --color-hunter-green-700: #374d2f;
+  --color-hunter-green-800: #2d3e27;
+  --color-hunter-green-900: #253321;
+  --color-hunter-green-950: #1a2517;
+
+  --color-norway-50: #f6f9f4;
+  --color-norway-100: #eaf1e7;
+  --color-norway-200: #d5e3cf;
+  --color-norway-300: #acc8a2;
+  --color-norway-400: #88ad7b;
+  --color-norway-500: #668f58;
+  --color-norway-600: #517445;
+  --color-norway-700: #425c39;
+  --color-norway-800: #374b30;
+  --color-norway-900: #2e3e29;
+  --color-norway-950: #162013;
+}
+
+* {
+  font-family: "Elms Sans", sans-serif;
+}
