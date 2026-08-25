@@ -1,7 +1,7 @@
-import React from "react";
 import { motion } from "motion/react";
-import { FaGithub } from "react-icons/fa";
+import { useNavigate } from "react-router";
 const NavBar = () => {
+  const navigate = useNavigate();
   return (
     <header className="w-full border-b border-hunter-green-800/80">
       <nav className="flex items-center justify-between">
@@ -15,6 +15,7 @@ const NavBar = () => {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.99 }}
           className="rounded-2xl  bg-norway-300 px-4 py-2 text-md font-medium text-hunter-green-950 hover:bg-norway-400 transition-colors"
+          onClick={() => navigate("/auth")}
         >
           Get started
         </motion.button>

@@ -1,9 +1,7 @@
-import { motion } from "motion/react";
-import GitAuth from "./components/gitAuth";
-import NavBar from "./components/NavBar";
 import { Route, Routes } from "react-router";
 import MainLayout from "./page/MainLayout";
 import Home from "./page/Home";
+import Login from "./page/Login";
 
 const App = () => {
   return (
@@ -12,6 +10,7 @@ const App = () => {
       <Route element={<MainLayout />}>
         <Route path="/" element={<Home />} />
       </Route>
+      <Route path="/auth" element={<Login />} />
       {/* Dashboard */}
     </Routes>
   );
