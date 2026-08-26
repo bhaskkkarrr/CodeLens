@@ -1,8 +1,17 @@
 import express from "express";
 import dotenv from "dotenv";
 import axios from "axios";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+import authRouter from "./routes/auth.routes.js";
+import connectDB from "./config/connectDB.js";
+
 const app = express();
 dotenv.config();
+
+// Database Connect
+connectDB();
+
 app.get("/api/git-oauth", async (req, res) => {
   console.log(req.query);
   console.log(process.env.GITHUB_CLIENT_ID);
@@ -29,4 +38,12 @@ app.get("/api/git-oauth", async (req, res) => {
   console.log("authRes", authResponse.data);
   res.send("OAuth callback received");
 });
+
+app.use(morgan("dev"));
+app.use(express.json());
+app.use(cookieParser());
+
+// Routes
+app.use("/api/auth", authRouter);
+
 export default app;

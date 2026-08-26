@@ -1,14 +1,35 @@
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { motion } from "motion/react";
 import { IoEyeOffSharp } from "react-icons/io5";
 import { IoEye } from "react-icons/io5";
 import { FaGithub } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
+import axios from "axios";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import {
+  auth,
+  githubAuthProvider,
+  googleAuthProvider,
+} from "../services/firebaseAuth";
 
 const Login = () => {
   const [isLoginState, setIsLoginState] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const { register, handleSubmit } = useForm();
+  const handleGoogleSubmit = async () => {
+    // const res = await axios.get();
+    // console.log("Res", res);
+  };
+  const handleGitHubSubmit = async () => {
+    const res = await signInWithPopup(auth, githubAuthProvider);
+    console.log("Res", res);
+  };
+  const handleEmailSubmit = async ({ email, password }) => {
+    const res = await createUserWithEmailAndPassword(auth, email, password);
+    console.log("Res", res);
+  };
   return (
     <>
       {/* Background */}
@@ -93,7 +114,10 @@ const Login = () => {
                     Login to your account
                   </h1>
                 </div>
-                <form className="space-y-6">
+                <form
+                  className="space-y-6"
+                  onSubmit={handleSubmit((body) => handleEmailSubmit(body))}
+                >
                   {/* Email */}
                   <div className="">
                     <label
@@ -109,6 +133,7 @@ const Login = () => {
                       placeholder="john@readymadeui.com"
                       required
                       className="px-3 py-2.5 text-sm w-full text-hunter-green-800 rounded-xl bg-white outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-hunter-green-600"
+                      {...register("email", { required: true })}
                     />
                   </div>
 
@@ -128,6 +153,7 @@ const Login = () => {
                         placeholder=". . . . . ."
                         required
                         className=" text-sm w-full text-slate-900 outline-none "
+                        {...register("password", { required: true })}
                       />
                       <div
                         className="text-norway-500 cursor-pointer transition-all duration-300"
@@ -169,6 +195,7 @@ const Login = () => {
                     whileTap={{ scale: 0.85 }}
                     type="button"
                     className="flex p-2 items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
+                    onClick={() => handleGitHubSubmit()}
                   >
                     <FaGithub />
                   </motion.button>
@@ -178,6 +205,7 @@ const Login = () => {
                     whileTap={{ scale: 0.85 }}
                     type="button"
                     className=" flex p-2 cursor-pointer items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
+                    onClick={() => handleGoogleSubmit()}
                   >
                     <FcGoogle />
                   </motion.button>
