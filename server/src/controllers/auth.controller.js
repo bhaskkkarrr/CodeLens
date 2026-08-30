@@ -49,92 +49,106 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email } = req.firebaseUser;
-  const isUser = await User.findOne({ email });
-  if (!isUser) {
-    return res.status(400).json({
-      success: false,
-      message: "User not registered",
-    });
-  }
+  try {
+    const { email } = req.firebaseUser;
+    const isUser = await User.findOne({ email });
+    if (!isUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User not registered",
+      });
+    }
 
-  const session = await createSession(isUser, req);
-  if (session.success) {
-    res.cookie("refreshToken", session.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000 * 7,
-    });
-    return res.status(200).json({
-      success: true,
-      message: "User logged in",
-      token: session.token,
-      user: {
-        email: isUser.email,
-        username: isUser.username,
-        credits: isUser.credits,
-      },
-    });
-  } else {
-    return res.status(400).json({
+    const session = await createSession(isUser, req);
+    if (session.success) {
+      res.cookie("refreshToken", session.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000 * 7,
+      });
+      return res.status(200).json({
+        success: true,
+        message: "User logged in",
+        token: session.token,
+        user: {
+          email: isUser.email,
+          username: isUser.username,
+          credits: isUser.credits,
+        },
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Error while logging user",
+        error: session.message,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: "Error while logging user",
-      error: session.message,
+      message: "Server error while signing up user",
     });
   }
 };
 
 export const firebaseAuth = async (req, res) => {
-  const { email, name, picture, uid } = req.firebaseUser;
+  try {
+    const { email, name, picture, uid } = req.firebaseUser;
 
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: "Email is required",
-    });
-  }
-
-  let user = await User.findOne({ email });
-  if (!user) {
-    let url = null;
-    if (picture) {
-      const response = await cloudinaryUpload(picture);
-      if (response.success) {
-        url = response.url;
-      }
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required",
+      });
     }
-    const newUser = await User.create({
-      email,
-      username: name,
-      profilePic: url,
-      firebaseuid: uid,
-    });
-    user = newUser;
-  }
-  const session = await createSession(user, req);
-  if (session.success) {
-    res.cookie("refreshToken", session.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000 * 7,
-    });
-    return res.status(200).json({
-      success: true,
-      message: "User logged in",
-      token: session.token,
-      user: {
-        email: user.email,
-        username: user.username,
-        credits: user.credits,
-      },
-    });
-  } else {
-    return res.status(400).json({
+
+    let user = await User.findOne({ email });
+    if (!user) {
+      let url = null;
+      if (picture) {
+        const response = await cloudinaryUpload(picture);
+        if (response.success) {
+          url = response.url;
+        }
+      }
+      const newUser = await User.create({
+        email,
+        username: name,
+        profilePic: url,
+        firebaseuid: uid,
+      });
+      user = newUser;
+    }
+    const session = await createSession(user, req);
+    if (session.success) {
+      res.cookie("refreshToken", session.refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 24 * 60 * 60 * 1000 * 7,
+      });
+      return res.status(200).json({
+        success: true,
+        message: "User logged in",
+        token: session.token,
+        user: {
+          email: user.email,
+          username: user.username,
+          credits: user.credits,
+        },
+      });
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: "Error while logging user",
+        error: session.message,
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
       success: false,
-      message: "Error while logging user",
-      error: session.message,
+      message: "Server error while signing up user",
     });
   }
 };
