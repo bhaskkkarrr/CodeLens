@@ -43,11 +43,20 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.log(error);
-      toast.error(
-        error.response.data.message ||
-          error.message ||
-          "Something went wrong. try again !!",
-      );
+      if (error.code === "auth/account-exists-with-different-credential") {
+        toast.error(
+          "Use your original sign in method to sign in and try again",
+          {
+            duration: 7000,
+          },
+        );
+      } else {
+        toast.error(
+          error?.response?.data?.message ||
+            error.message ||
+            "Something went wrong. try again !!",
+        );
+      }
       return { success: false };
     } finally {
       setIsAuthenticating(false);
@@ -71,11 +80,20 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.log(error);
-      toast.error(
-        error?.response?.data?.message ||
-          error.message ||
-          "Something went wrong. try again !!",
-      );
+      if (error.code === "auth/account-exists-with-different-credential") {
+        toast.error(
+          "Use your original sign in method to sign in and try again",
+          {
+            duration: 7000,
+          },
+        );
+      } else {
+        toast.error(
+          error?.response?.data?.message ||
+            error.message ||
+            "Something went wrong. try again !!",
+        );
+      }
       return { success: false };
     } finally {
       setIsAuthenticating(false);
