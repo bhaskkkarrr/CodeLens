@@ -29,13 +29,13 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticating(true);
 
       const res = await signInWithPopup(auth, googleAuthProvider);
-      const cuurentUser = await auth.currentUser.getIdToken();
-
+      const idToken = await auth.currentUser.getIdToken();
+      console.log("Current User", idToken);
       const googleResponse = await axiosInstance.post(
         "/api/auth/firebase-auth",
         {},
         {
-          headers: { Authorization: `Bearer ${cuurentUser}` },
+          headers: { Authorization: `Bearer ${idToken}` },
         },
       );
       tokenAndUser(googleResponse.data);
@@ -67,12 +67,13 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsAuthenticating(true);
       const res = await signInWithPopup(auth, githubAuthProvider);
-      const cuurentUser = await auth.currentUser.getIdToken();
+      const idToken = await auth.currentUser.getIdToken();
+      console.log("Current User", idToken);
       const gitResponse = await axiosInstance.post(
         "/api/auth/firebase-auth",
         {},
         {
-          headers: { Authorization: `Bearer ${cuurentUser}` },
+          headers: { Authorization: `Bearer ${idToken}` },
         },
       );
       tokenAndUser(gitResponse.data);
@@ -105,7 +106,7 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticating(true);
       const res = await signInWithEmailAndPassword(auth, email, password);
       const idToken = await auth.currentUser.getIdToken();
-      console.log("Res", res);
+      console.log("Current User", idToken);
       const loginResponse = await axiosInstance.post(
         "/api/auth/login",
         {},
@@ -117,7 +118,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       toast.error(
-        error.response.data.message ||
+        error?.response?.data?.message ||
           error.message ||
           "Something went wrong. try again !!",
       );
@@ -131,8 +132,8 @@ export const AuthProvider = ({ children }) => {
     try {
       setIsAuthenticating(true);
       const res = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Res", res);
       const idToken = await auth.currentUser.getIdToken();
+      console.log("Current User", idToken);
       const registerResponse = await axiosInstance.post(
         "/api/auth/register",
         { username, password },
@@ -143,7 +144,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       toast.error(
-        error.response.data.message ||
+        error?.response?.data?.message ||
           error.message ||
           "Something went wrong. try again !!",
       );
