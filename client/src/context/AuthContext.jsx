@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { createContext } from "react";
 
 import {
@@ -154,9 +154,27 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getAccessToken = async () => {
+    try {
+      const res = await axiosInstance.get("/api/auth/me");
+      tokenAndUser(res.data);
+    } catch (error) {
+      toast.error(
+        error?.response?.data?.message ||
+          error.message ||
+          "Something went wrong. try again !!",
+      );
+      return { success: false };
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  useEffect(() => {
+    getAccessToken();
+  }, []);
   console.log("User", user);
   console.log("Token", token);
-
   return (
     <AuthContext.Provider
       value={{

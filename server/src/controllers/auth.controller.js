@@ -216,9 +216,9 @@ export const me = async (req, res) => {
     session.refreshTokenHash = newRefreshTokenHash;
     await session.save();
 
-    res.cookie("refreshToken", refreshToken, {
-      secure: true,
+    res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
+      secure: true,
       sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000 * 7,
     });
