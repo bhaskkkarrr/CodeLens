@@ -6,29 +6,108 @@ import { IoEye } from "react-icons/io5";
 import { FaGithub } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import axios from "axios";
-import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+  GithubAuthProvider,
+  GoogleAuthProvider,
+  linkWithCredential,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from "firebase/auth";
 import {
   auth,
   githubAuthProvider,
   googleAuthProvider,
 } from "../services/firebaseAuth";
+import { axiosInstance } from "../services/axiosInstance";
 
 const Login = () => {
   const [isLoginState, setIsLoginState] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [errors, setErrors] = useState("");
   const { register, handleSubmit } = useForm();
   const handleGoogleSubmit = async () => {
-    // const res = await axios.get();
-    // console.log("Res", res);
+    try {
+      const res = await signInWithPopup(auth, googleAuthProvider);
+      const cuurentUser = await auth.currentUser.getIdToken();
+      console.log(cuurentUser);
+      console.log("Res", res);
+      const backendRes = await axiosInstance.post(
+        "/api/auth/firebase-auth",
+        {},
+        {
+          headers: { Authorization: `Bearer ${cuurentUser}` },
+        },
+      );
+      console.log(backendRes);
+    } catch (error) {
+      console.log(error);
+      setErrors(error.code || "Something went wrong");
+      if (error.code === "auth/account-exists-with-different-credential") {
+        console.log("Account exists with another provider");
+      }
+    }
   };
   const handleGitHubSubmit = async () => {
-    const res = await signInWithPopup(auth, githubAuthProvider);
-    console.log("Res", res);
+    try {
+      const res = await signInWithPopup(auth, githubAuthProvider);
+      const cuurentUser = await auth.currentUser.getIdToken();
+      const backendRes = await axiosInstance.post(
+        "/api/auth/firebase-auth",
+        {},
+        {
+          headers: { Authorization: `Bearer ${cuurentUser}` },
+        },
+      );
+      console.log(cuurentUser);
+      console.log(backendRes.data);
+      console.log("Res", res);
+    } catch (error) {
+      console.log(error);
+      setErrors(error.code || "Something went wrong");
+      if (error.code === "auth/account-exists-with-different-credential") {
+        console.log("Account exists with another provider");
+      }
+    }
   };
-  const handleEmailSubmit = async ({ email, password }) => {
-    const res = await createUserWithEmailAndPassword(auth, email, password);
-    console.log("Res", res);
+  const handleEmailLoginSubmit = async ({ email, password }) => {
+    try {
+      const res = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await auth.currentUser.getIdToken();
+      console.log("Res", res);
+      const loginResponse = await axiosInstance.post(
+        "/api/auth/login",
+        {},
+        { headers: { Authorization: `Bearer ${idToken}` } },
+      );
+      console.log("Res", loginResponse.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleEmailRegisterSubmit = async ({
+    email,
+    password,
+    confirmPassword,
+    username,
+  }) => {
+    if (password !== confirmPassword) {
+      setErrors("Passwords doesn't match");
+      console.log("Incorrect password");
+    } else {
+      const res = await createUserWithEmailAndPassword(auth, email, password);
+      console.log("Res", res);
+      const idToken = await auth.currentUser.getIdToken();
+      const registerResponse = await axiosInstance.post(
+        "/api/auth/register",
+        { username, password },
+        { headers: { Authorization: `Bearer ${idToken}` } },
+      );
+      console.log("Res", registerResponse.data);
+    }
   };
   return (
     <>
@@ -54,7 +133,7 @@ const Login = () => {
         transition={{ duration: 0.6 }}
         className="max-w-4xl flex items-center justify-center my-5 md:my-0 mx-auto min-h-screen p-4 md:p-8 "
       >
-        <div className="grid items-center gap-y-10 bg-norway-200 shadow-lg shadow-norway-100/30 rounded-lg overflow-hidden md:grid-cols-3">
+        <div className="grid items-center gap--10 bg-norway-200 shadow-lg shadow-norway-100/30 rounded-lg overflow-hidden md:grid-cols-3">
           <div className="md:flex flex-col hidden justify-center space-y-6 min-h-full bg-linear-to-r from-hunter-green-600 to-hunter-green-700 p-6 max-md:order-1 md:space-y-16">
             <div>
               <h2 className="text-white text-lg font-semibold font-mono dark:text-slate-50">
@@ -100,7 +179,7 @@ const Login = () => {
             {isLoginState ? (
               <motion.div
                 key="login"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{
                   opacity: 1,
                   y: 0,
@@ -116,7 +195,9 @@ const Login = () => {
                 </div>
                 <form
                   className="space-y-6"
-                  onSubmit={handleSubmit((body) => handleEmailSubmit(body))}
+                  onSubmit={handleSubmit((body) =>
+                    handleEmailLoginSubmit(body),
+                  )}
                 >
                   {/* Email */}
                   <div className="">
@@ -184,32 +265,6 @@ const Login = () => {
                   </motion.button>
                 </form>
 
-                <div className="relative my-2 text-center">
-                  <span className="relative z-10 px-3 text-norway-400">
-                    ----- Or continue with -----
-                  </span>
-                </div>
-                <div className="flex justify-center items-center gap-5">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.85 }}
-                    type="button"
-                    className="flex p-2 items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
-                    onClick={() => handleGitHubSubmit()}
-                  >
-                    <FaGithub />
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.85 }}
-                    type="button"
-                    className=" flex p-2 cursor-pointer items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
-                    onClick={() => handleGoogleSubmit()}
-                  >
-                    <FcGoogle />
-                  </motion.button>
-                </div>
                 <div className="mt-6 block md:hidden text-hunter-green-700 text-sm text-center">
                   Getting Started?
                   <div
@@ -223,7 +278,7 @@ const Login = () => {
             ) : (
               <motion.div
                 key="signup"
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 10 }}
                 whileInView={{
                   opacity: 1,
                   y: 0,
@@ -237,7 +292,12 @@ const Login = () => {
                     Create an account
                   </h1>
                 </div>
-                <form className="space-y-6">
+                <form
+                  className="space-y-6"
+                  onSubmit={handleSubmit((body) =>
+                    handleEmailRegisterSubmit(body),
+                  )}
+                >
                   {/* Email */}
                   <div className="">
                     <label
@@ -253,22 +313,26 @@ const Login = () => {
                       placeholder="john@readymadeui.com"
                       required
                       className="px-3 py-2.5 text-sm text-hunter-green-800 rounded-xl bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-hunter-green-600"
+                      {...register("email", { required: true })}
                     />
                   </div>
 
                   {/* Username */}
                   <div className="">
                     <label
-                      htmlFor="email"
+                      htmlFor="username"
                       className="mb-2 text-slate-900 font-medium text-sm inline-block dark:text-slate-50"
                     >
                       Username
                     </label>
                     <input
                       type="text"
+                      id="username"
+                      name="username"
                       placeholder="John Doe"
                       required
                       className="px-3 py-2.5 text-sm text-hunter-green-800 rounded-xl bg-white w-full outline-1 -outline-offset-1 outline-slate-300 focus:outline-2 focus:-outline-offset-2 focus:outline-hunter-green-600"
+                      {...register("username", { required: true })}
                     />
                   </div>
 
@@ -288,6 +352,7 @@ const Login = () => {
                         placeholder=". . . . . ."
                         required
                         className=" text-sm text-slate-900 outline-none "
+                        {...register("password", { required: true })}
                       />
                       <div
                         className="text-norway-500 cursor-pointer transition-all duration-300"
@@ -324,6 +389,7 @@ const Login = () => {
                         placeholder=". . . . . ."
                         required
                         className="text-sm text-hunter-green-800 outline-none"
+                        {...register("confirmPassword", { required: true })}
                       />
                       <div
                         className="text-norway-500 cursor-pointer transition-all duration-300"
@@ -354,30 +420,6 @@ const Login = () => {
                   </motion.button>
                 </form>
 
-                <div className="relative my-2 text-center">
-                  <span className="relative z-10 px-3 text-norway-400">
-                    ----- Or continue with -----
-                  </span>
-                </div>
-                <div className="flex justify-center items-center gap-5">
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.85 }}
-                    type="button"
-                    className="flex p-2 items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
-                  >
-                    <FaGithub />
-                  </motion.button>
-
-                  <motion.button
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.85 }}
-                    type="button"
-                    className=" flex p-2 cursor-pointer items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
-                  >
-                    <FcGoogle />
-                  </motion.button>
-                </div>
                 <div className="mt-6 block md:hidden text-hunter-green-700 text-sm text-center">
                   Already have an account?
                   <div
@@ -389,6 +431,34 @@ const Login = () => {
                 </div>
               </motion.div>
             )}
+            <div className="">
+              <div className="relative my-2 text-center">
+                <span className="relative z-10 px-3 text-norway-400">
+                  ----- Or continue with -----
+                </span>
+              </div>
+              <div className="flex justify-center items-center gap-5">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.85 }}
+                  type="button"
+                  className="flex p-2 items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
+                  onClick={() => handleGitHubSubmit()}
+                >
+                  <FaGithub />
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.85 }}
+                  type="button"
+                  className=" flex p-2 cursor-pointer items-center justify-center gap-2 rounded-xl bg-hunter-green-800 text-gray-300 hover:bg-gray-900"
+                  onClick={() => handleGoogleSubmit()}
+                >
+                  <FcGoogle />
+                </motion.button>
+              </div>
+            </div>
           </div>
         </div>
       </motion.main>

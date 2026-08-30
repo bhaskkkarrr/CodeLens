@@ -1,18 +1,25 @@
-import mongoose, { mongo } from "mongoose";
+import mongoose from "mongoose";
 const userSchema = new mongoose.Schema(
   {
+    firebaseuid: {
+      type: String,
+      required: [true, "UID is required"],
+    },
     email: {
       type: String,
       unique: [true, "Email should be unique"],
       required: [true, "Email is required"],
     },
     username: String,
-    password: String,
+    password: {
+      type: String,
+      default: null,
+    },
     isVerified: {
       type: Boolean,
       default: false,
     },
-    profileUrl: { type: String, default: null },
+    profilePic: { type: String, default: null },
     gitProfile: { type: String, default: null },
     credits: {
       type: Number,

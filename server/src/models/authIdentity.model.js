@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-
 const authIdentitySchema = new mongoose.Schema(
   {
     userId: {
@@ -7,8 +6,13 @@ const authIdentitySchema = new mongoose.Schema(
       ref: "User",
       required: [true, "User id is required"],
     },
-    provider: String,
+    provider: { type: String, enum: ["email", "google.com", "github.com"] },
     providerId: String,
+    uid: String,
+    passwordHash: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true },
 );
