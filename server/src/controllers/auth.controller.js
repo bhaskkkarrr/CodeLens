@@ -120,7 +120,9 @@ export const firebaseAuth = async (req, res) => {
       });
       user = newUser;
     }
+    console.log("USER", user);
     const session = await createSession(user, req);
+    console.log("SESSION", session);
     if (session.success) {
       res.cookie("refreshToken", session.refreshToken, {
         httpOnly: true,
@@ -148,7 +150,7 @@ export const firebaseAuth = async (req, res) => {
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Server error while signing up user",
+      message: "Server error while logging in user",
     });
   }
 };

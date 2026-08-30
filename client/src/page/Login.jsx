@@ -5,86 +5,44 @@ import { IoEyeOffSharp } from "react-icons/io5";
 import { IoEye } from "react-icons/io5";
 import { FaGithub } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
-import axios from "axios";
-import {
-  createUserWithEmailAndPassword,
-  fetchSignInMethodsForEmail,
-  GithubAuthProvider,
-  GoogleAuthProvider,
-  linkWithCredential,
-  signInWithEmailAndPassword,
-  signInWithPopup,
-} from "firebase/auth";
-import {
-  auth,
-  githubAuthProvider,
-  googleAuthProvider,
-} from "../services/firebaseAuth";
-import { axiosInstance } from "../services/axiosInstance";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router";
+import { FullScreenLoader } from "../components/Loaders";
 
 const Login = () => {
   const [isLoginState, setIsLoginState] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [errors, setErrors] = useState("");
+
+  const {
+    googleSubmit,
+    gitHubSubmit,
+    emailRegisterSubmit,
+    emailLoginSubmit,
+    isAuthenticating,
+  } = useAuth();
+  const navigate = useNavigate();
   const { register, handleSubmit } = useForm();
+
   const handleGoogleSubmit = async () => {
-    try {
-      const res = await signInWithPopup(auth, googleAuthProvider);
-      const cuurentUser = await auth.currentUser.getIdToken();
-      console.log(cuurentUser);
-      console.log("Res", res);
-      const backendRes = await axiosInstance.post(
-        "/api/auth/firebase-auth",
-        {},
-        {
-          headers: { Authorization: `Bearer ${cuurentUser}` },
-        },
-      );
-      console.log(backendRes);
-    } catch (error) {
-      console.log(error);
-      setErrors(error.code || "Something went wrong");
-      if (error.code === "auth/account-exists-with-different-credential") {
-        console.log("Account exists with another provider");
-      }
+    const res = await googleSubmit();
+    if (res.success) {
+      navigate("/");
     }
   };
+
   const handleGitHubSubmit = async () => {
-    try {
-      const res = await signInWithPopup(auth, githubAuthProvider);
-      const cuurentUser = await auth.currentUser.getIdToken();
-      const backendRes = await axiosInstance.post(
-        "/api/auth/firebase-auth",
-        {},
-        {
-          headers: { Authorization: `Bearer ${cuurentUser}` },
-        },
-      );
-      console.log(cuurentUser);
-      console.log(backendRes.data);
-      console.log("Res", res);
-    } catch (error) {
-      console.log(error);
-      setErrors(error.code || "Something went wrong");
-      if (error.code === "auth/account-exists-with-different-credential") {
-        console.log("Account exists with another provider");
-      }
+    const res = await gitHubSubmit();
+    if (res.success) {
+      navigate("/");
     }
   };
+
   const handleEmailLoginSubmit = async ({ email, password }) => {
-    try {
-      const res = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await auth.currentUser.getIdToken();
-      console.log("Res", res);
-      const loginResponse = await axiosInstance.post(
-        "/api/auth/login",
-        {},
-        { headers: { Authorization: `Bearer ${idToken}` } },
-      );
-      console.log("Res", loginResponse.data);
-    } catch (error) {
-      console.error(error);
+    const res = await emailLoginSubmit(email, password);
+    if (res.success) {
+      navigate("/");
     }
   };
 
@@ -95,20 +53,14 @@ const Login = () => {
     username,
   }) => {
     if (password !== confirmPassword) {
-      setErrors("Passwords doesn't match");
-      console.log("Incorrect password");
-    } else {
-      const res = await createUserWithEmailAndPassword(auth, email, password);
-      console.log("Res", res);
-      const idToken = await auth.currentUser.getIdToken();
-      const registerResponse = await axiosInstance.post(
-        "/api/auth/register",
-        { username, password },
-        { headers: { Authorization: `Bearer ${idToken}` } },
-      );
-      console.log("Res", registerResponse.data);
+      return toast.error("Passwords doesn't match");
+    }
+    const res = await emailRegisterSubmit(email, password, username);
+    if (res.success) {
+      navigate("/");
     }
   };
+
   return (
     <>
       {/* Background */}
@@ -127,6 +79,7 @@ const Login = () => {
         {/* fine graph-paper grid, like an editor's line/column guides */}
         <div className="absolute inset-0 opacity-[0.07] bg-[linear-gradient(#acc8a2_1px,transparent_1px),linear-gradient(90deg,#acc8a2_1px,transparent_1px)] bg-size-[44px_44px] sm:bg-size-[56px_56px]" />
       </div>
+      {!isAuthenticating && <FullScreenLoader />}
       <motion.main
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -432,8 +385,8 @@ const Login = () => {
               </motion.div>
             )}
             <div className="">
-              <div className="relative my-2 text-center">
-                <span className="relative z-10 px-3 text-norway-400">
+              <div className=" my-2 text-center">
+                <span className="  px-3 text-norway-400">
                   ----- Or continue with -----
                 </span>
               </div>

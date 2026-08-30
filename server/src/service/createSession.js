@@ -1,5 +1,6 @@
 import Session from "../models/session.model.js";
 import config from "../config/config.js";
+import crypto from "crypto";
 import jwt from "jsonwebtoken";
 
 export const createSession = async (user, req) => {
