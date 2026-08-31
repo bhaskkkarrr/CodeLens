@@ -159,6 +159,28 @@ export const AuthProvider = ({ children }) => {
       const res = await axiosInstance.get("/api/auth/me");
       tokenAndUser(res.data);
     } catch (error) {
+      console.error(error);
+    } finally {
+      setIsAuthenticating(false);
+    }
+  };
+
+  const verifyOTP = async (otp) => {
+    try {
+      setIsAuthenticating(true);
+      const idToken = await auth.currentUser.getIdToken();
+      console.log("idToken", idToken);
+      const res = await axiosInstance.post(
+        "/api/auth/verify-otp",
+        { otp },
+        {
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+        },
+      );
+      console.log(res.data);
+    } catch (error) {
       toast.error(
         error?.response?.data?.message ||
           error.message ||
@@ -169,7 +191,6 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticating(false);
     }
   };
-
   useEffect(() => {
     getAccessToken();
   }, []);
@@ -183,6 +204,7 @@ export const AuthProvider = ({ children }) => {
         emailRegisterSubmit,
         emailLoginSubmit,
         isAuthenticating,
+        verifyOTP,
       }}
     >
       {children}
