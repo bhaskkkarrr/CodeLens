@@ -11,6 +11,7 @@ authRouter.post(
   authController.firebaseAuth,
 );
 authRouter.get("/me", authController.me);
+authRouter.post("/verify-otp", decodeFirebaseToken, authController.otpVerify);
 authRouter.post("/logout", isVerified, authController.logout);
 
 export default authRouter;

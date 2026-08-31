@@ -5,6 +5,10 @@ import { createSession } from "../service/createSession.js";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 import Session from "../models/session.model.js";
+import { generateHtmlForOtp, generateOTP } from "../utils/generateOTP.js";
+import { sendMail } from "../service/email.service.js";
+import OTP from "../models/otp.model.js";
+
 export const register = async (req, res) => {
   console.log(req.firebaseUser);
   let { email, uid } = req.firebaseUser;
@@ -32,6 +36,18 @@ export const register = async (req, res) => {
       password: hashedPassword,
       firebaseuid: uid,
     });
+    const otp = generateOTP();
+    const otpHTML = generateHtmlForOtp(otp);
+    const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+
+    const otpdocument = await OTP.create({ userId: user._id, email, otpHash });
+    console.log("reached done");
+    const emailResponse = await sendMail(
+      email,
+      "Your verification code",
+      `Your otp is ${otp}`,
+      otpHTML,
+    );
 
     return res.status(201).json({
       success: true,
@@ -41,6 +57,7 @@ export const register = async (req, res) => {
         username: user.username,
         credits: user.credits,
       },
+      emailSent: emailResponse.success,
     });
   } catch (error) {
     return res.status(500).json({
@@ -119,6 +136,7 @@ export const firebaseAuth = async (req, res) => {
         username: name,
         profilePic: url,
         firebaseuid: uid,
+        isVerified: true,
       });
       user = newUser;
     }
@@ -241,4 +259,51 @@ export const me = async (req, res) => {
   }
 };
 
+export const otpVerify = async (req, res) => {
+  try {
+    const { uid } = req.firebaseUser;
+    const { otp } = req.body;
+    const user = await User.findOne({ firebaseuid: uid });
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const otpDoc = await OTP.findOne({
+      $and: [{ userId: user._id }, { isUsed: false }],
+    });
+    if (!otpDoc) {
+      return res.status(400).json({
+        success: false,
+        message: "No OTP to verify",
+      });
+    }
+
+    const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+    const isValidOTP = otpHash === otpDoc.otpHash;
+    if (!isValidOTP) {
+      return res.status(400).json({
+        success: false,
+        message: "Incorrect OTP",
+      });
+    }
+
+    otpDoc.isUsed = true;
+    await otpDoc.save();
+
+    user.isVerified = true;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "User email verified",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
 export const logout = async (req, res) => {};

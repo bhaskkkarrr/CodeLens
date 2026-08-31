@@ -34,6 +34,13 @@ if (!process.env.FIREBASE_PRIVATE_KEY) {
 if (!process.env.FIREBASE_CLIENT_EMAIL) {
   throw new Error("No FIREBASE_CLIENT_EMAIL found in environment variables");
 }
+if (!process.env.GOOGLE_USER) {
+  throw new Error("No GOOGLE_USER found in environment variables");
+}
+if (!process.env.GOOGLE_APP_PASSWORD) {
+  throw new Error("No GOOGLE_APP_PASSWORD found in environment variables");
+}
+
 const config = {
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
@@ -46,5 +53,7 @@ const config = {
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL,
   FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
+  GOOGLE_USER: process.env.GOOGLE_USER,
+  GOOGLE_APP_PASSWORD: process.env.GOOGLE_APP_PASSWORD,
 };
 export default config;
