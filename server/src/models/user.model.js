@@ -19,6 +19,10 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    gitConnected: {
+      type: Boolean,
+      default: false,
+    },
     profilePic: { type: String, default: null },
     gitProfile: { type: String, default: null },
     credits: {

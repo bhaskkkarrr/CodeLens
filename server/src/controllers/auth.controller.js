@@ -8,7 +8,8 @@ import Session from "../models/session.model.js";
 import { generateHtmlForOtp, generateOTP } from "../utils/generateOTP.js";
 import { sendMail } from "../service/email.service.js";
 import OTP from "../models/otp.model.js";
-
+import axios from "axios";
+import GithubConnection from "../models/githubConnection.model.js";
 export const register = async (req, res) => {
   console.log(req.firebaseUser);
   let { email, uid } = req.firebaseUser;
@@ -211,7 +212,6 @@ export const me = async (req, res) => {
       refreshTokenHash,
       revoked: false,
     });
-    console.log("Sess", session);
     if (!session) {
       return res.status(400).json({
         success: false,
@@ -306,4 +306,106 @@ export const otpVerify = async (req, res) => {
     });
   }
 };
+
+export const connectGithub = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.redirect(
+        "http://localhost:5173/dashboard/git_connect_error?reason=user_not_logged_in",
+      );
+    }
+
+    const decodedUser = jwt.verify(refreshToken, config.JWT_SECRET);
+
+    const user = await User.findById(decodedUser.id);
+
+    if (!user) {
+      return res.redirect(
+        "http://localhost:5173/dashboard/git_connect_error?reason=invalid_user",
+      );
+    }
+
+    if (user.gitConnected) {
+      return res.redirect(
+        "http://localhost:5173/dashboard?reason=github_already_connected",
+      );
+    }
+
+    const { code } = req.query;
+
+    if (!code) {
+      return res.redirect(
+        "http://localhost:5173/dashboard/git_connect_error?reason=missing_code",
+      );
+    }
+
+    const tokenResponse = await axios.post(
+      "https://github.com/login/oauth/access_token",
+      {
+        client_id: config.GITHUB_CLIENT_ID,
+        client_secret: config.GITHUB_CLIENT_SECRET,
+        code,
+      },
+      {
+        headers: {
+          Accept: "application/json",
+        },
+      },
+    );
+
+    const { access_token: accessToken, refresh_token: githubRefreshToken } =
+      tokenResponse.data;
+
+    if (!accessToken) {
+      return res.redirect(
+        "http://localhost:5173/dashboard/git_connect_error?reason=token_failed",
+      );
+    }
+
+    const gitUserResponse = await axios.get("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    const gitUser = gitUserResponse.data;
+
+    // Important: githubRefreshToken may not exist
+    if (!githubRefreshToken) {
+      return res.redirect(
+        "http://localhost:5173/dashboard/git_connect_error?reason=missing_refresh_token",
+      );
+    }
+
+    const refreshTokenHash = crypto
+      .createHash("sha256")
+      .update(githubRefreshToken)
+      .digest("hex");
+
+    await GithubConnection.create({
+      userId: user._id,
+      githubId: gitUser.id,
+      refreshTokenHash,
+    });
+
+    user.gitProfile = gitUser.html_url;
+    user.gitConnected = true;
+
+    await user.save();
+
+    return res.redirect("http://localhost:5173/dashboard");
+  } catch (error) {
+    console.error(
+      "GitHub connection error:",
+      error.response?.data || error.message,
+    );
+
+    return res.redirect(
+      "http://localhost:5173/dashboard/git_connect_error?reason=server_error",
+    );
+  }
+};
+
 export const logout = async (req, res) => {};

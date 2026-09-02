@@ -14,14 +14,6 @@ dotenv.config();
 // Database Connect
 connectDB();
 
-app.get("/api/git-oauth", async (req, res) => {
-  console.log(req.query);
-  console.log(process.env.GITHUB_CLIENT_ID);
-  console.log(process.env.GITHUB_CLIENT_SECRET);
-  
-  res.send("OAuth callback received");
-});
-
 app.use(cors({ origin: config.FRONTEND_URL, credentials: true }));
 app.use(morgan("dev"));
 app.use(express.json());

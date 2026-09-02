@@ -7,8 +7,6 @@ const transporter = nodemailer.createTransport({
     pass: config.GOOGLE_APP_PASSWORD,
   },
 });
-console.log(config.GOOGLE_USER);
-console.log(config.GOOGLE_APP_PASSWORD);
 transporter.verify((error, success) => {
   if (error) {
     console.error("Email connection error:", error);

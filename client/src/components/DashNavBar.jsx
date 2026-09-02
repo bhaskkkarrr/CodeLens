@@ -66,9 +66,13 @@ const DashNavBar = () => {
                   CodeLens
                 </span>
               </div>
-              <div className=" me-2" onClick={() => setShowSideBar(false)}>
+              <motion.div
+                whileTap={{ rotate: 180 }}
+                className=" me-2"
+                onClick={() => setShowSideBar(false)}
+              >
                 <RxCross2 size={25} />
-              </div>
+              </motion.div>
             </div>
 
             <nav className="flex flex-col gap-5">
