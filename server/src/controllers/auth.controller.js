@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import cloudinaryUpload from "../service/cloudinaryUpload.js";
-import { createSession } from "../service/createSession.js";
+import { createSession } from "../utils/createSession.js";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 import Session from "../models/session.model.js";
