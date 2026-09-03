@@ -156,6 +156,7 @@ export const AuthProvider = ({ children }) => {
 
   const getAccessToken = async () => {
     try {
+      setIsAuthenticating(true);
       const res = await axiosInstance.get("/api/auth/me");
       tokenAndUser(res.data);
     } catch (error) {
@@ -205,6 +206,8 @@ export const AuthProvider = ({ children }) => {
         emailLoginSubmit,
         isAuthenticating,
         verifyOTP,
+        token,
+        user,
       }}
     >
       {children}

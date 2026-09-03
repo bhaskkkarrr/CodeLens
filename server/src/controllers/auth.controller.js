@@ -57,6 +57,8 @@ export const register = async (req, res) => {
         email: user.email,
         username: user.username,
         credits: user.credits,
+        gitConnected: user.gitConnected,
+        gitProfile: user.gitProfile,
       },
       emailSent: emailResponse.success,
     });
@@ -95,6 +97,8 @@ export const login = async (req, res) => {
           email: isUser.email,
           username: isUser.username,
           credits: isUser.credits,
+          gitConnected: isUser.gitConnected,
+          gitProfile: isUser.gitProfile,
         },
       });
     } else {
@@ -159,6 +163,8 @@ export const firebaseAuth = async (req, res) => {
           email: user.email,
           username: user.username,
           credits: user.credits,
+          gitConnected: user.gitConnected,
+          gitProfile: user.gitProfile,
         },
       });
     } else {
@@ -249,6 +255,8 @@ export const me = async (req, res) => {
         email: user.email,
         username: user.username,
         credits: user.credits,
+        gitConnected: user.gitConnected,
+        gitProfile: user.gitProfile,
       },
     });
   } catch (error) {
@@ -310,20 +318,22 @@ export const otpVerify = async (req, res) => {
 export const connectGithub = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
-
+    console.log("refresh", refreshToken, "\n\n");
     if (!refreshToken) {
       return res.redirect(
-        "http://localhost:5173/dashboard/git_connect_error?reason=user_not_logged_in",
+        "http://localhost:5173/dashboard?reason=user_not_logged_in",
       );
     }
 
     const decodedUser = jwt.verify(refreshToken, config.JWT_SECRET);
+    console.log("decode", decodedUser, "\n\n");
 
     const user = await User.findById(decodedUser.id);
 
+    console.log("user", user, "\n\n");
     if (!user) {
       return res.redirect(
-        "http://localhost:5173/dashboard/git_connect_error?reason=invalid_user",
+        "http://localhost:5173/dashboard?reason=invalid_user",
       );
     }
 
@@ -337,7 +347,7 @@ export const connectGithub = async (req, res) => {
 
     if (!code) {
       return res.redirect(
-        "http://localhost:5173/dashboard/git_connect_error?reason=missing_code",
+        "http://localhost:5173/dashboard?reason=missing_code",
       );
     }
 
@@ -355,12 +365,14 @@ export const connectGithub = async (req, res) => {
       },
     );
 
+    console.log("respo", tokenResponse, "\n\n");
+
     const { access_token: accessToken, refresh_token: githubRefreshToken } =
       tokenResponse.data;
 
     if (!accessToken) {
       return res.redirect(
-        "http://localhost:5173/dashboard/git_connect_error?reason=token_failed",
+        "http://localhost:5173/dashboard?reason=token_failed",
       );
     }
 
@@ -370,12 +382,14 @@ export const connectGithub = async (req, res) => {
       },
     });
 
+    console.log("gituser", gitUserResponse.data, "\n\n");
+
     const gitUser = gitUserResponse.data;
 
     // Important: githubRefreshToken may not exist
     if (!githubRefreshToken) {
       return res.redirect(
-        "http://localhost:5173/dashboard/git_connect_error?reason=missing_refresh_token",
+        "http://localhost:5173/dashboard?reason=missing_refresh_token",
       );
     }
 
@@ -384,12 +398,12 @@ export const connectGithub = async (req, res) => {
       .update(githubRefreshToken)
       .digest("hex");
 
-    await GithubConnection.create({
+    const gitCOnnection = await GithubConnection.create({
       userId: user._id,
       githubId: gitUser.id,
       refreshTokenHash,
     });
-
+    console.log("connect", gitCOnnection, "\n\n");
     user.gitProfile = gitUser.html_url;
     user.gitConnected = true;
 
@@ -402,9 +416,7 @@ export const connectGithub = async (req, res) => {
       error.response?.data || error.message,
     );
 
-    return res.redirect(
-      "http://localhost:5173/dashboard/git_connect_error?reason=server_error",
-    );
+    return res.redirect("http://localhost:5173/dashboard?reason=server_error");
   }
 };
 
