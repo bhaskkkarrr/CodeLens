@@ -21,7 +21,7 @@ app.use(cookieParser());
 
 // Routes
 app.head("/", (req, res) => {
-  res.status(200);
+  res.status(200).end();
 });
 app.use("/api/auth", authRouter);
 
