@@ -20,9 +20,11 @@ app.use(express.json());
 app.use(cookieParser());
 
 // Routes
+
+app.use("/api/auth", authRouter);
+app.use("/check", authRouter);
 app.head("/", (req, res) => {
   res.status(200).end();
 });
-app.use("/api/auth", authRouter);
 
 export default app;

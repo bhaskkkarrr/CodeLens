@@ -10,6 +10,7 @@ import { sendMail } from "../service/email.service.js";
 import OTP from "../models/otp.model.js";
 import axios from "axios";
 import GithubConnection from "../models/githubConnection.model.js";
+import { symmetricEncryption } from "../utils/encryption.js";
 export const register = async (req, res) => {
   console.log(req.firebaseUser);
   let { email, uid } = req.firebaseUser;
@@ -365,7 +366,7 @@ export const connectGithub = async (req, res) => {
       },
     );
 
-    console.log("respo", tokenResponse, "\n\n");
+    console.log("respo", tokenResponse.data, "\n\n");
 
     const { access_token: accessToken, refresh_token: githubRefreshToken } =
       tokenResponse.data;
@@ -392,18 +393,16 @@ export const connectGithub = async (req, res) => {
         "http://localhost:5173/dashboard?reason=missing_refresh_token",
       );
     }
+    const encryptionResponse = symmetricEncryption(githubRefreshToken);
 
-    const refreshTokenHash = crypto
-      .createHash("sha256")
-      .update(githubRefreshToken)
-      .digest("hex");
-
-    const gitCOnnection = await GithubConnection.create({
+    const gitConnection = await GithubConnection.create({
       userId: user._id,
       githubId: gitUser.id,
-      refreshTokenHash,
+      encryptedRefreshToken: encryptionResponse.encryptedData,
+      iv: encryptionResponse.iv,
+      authTag: encryptionResponse.authTag,
     });
-    console.log("connect", gitCOnnection, "\n\n");
+    console.log("connection", gitConnection, "\n\n");
     user.gitProfile = gitUser.html_url;
     user.gitConnected = true;
 

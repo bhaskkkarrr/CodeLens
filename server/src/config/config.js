@@ -40,6 +40,9 @@ if (!process.env.GOOGLE_USER) {
 if (!process.env.GOOGLE_APP_PASSWORD) {
   throw new Error("No GOOGLE_APP_PASSWORD found in environment variables");
 }
+if (!process.env.ENCRYPTION_SECRET_KEY) {
+  throw new Error("No ENCRYPTION_SECRET_KEY found in environment variables");
+}
 
 const config = {
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
@@ -55,5 +58,6 @@ const config = {
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID,
   GOOGLE_USER: process.env.GOOGLE_USER,
   GOOGLE_APP_PASSWORD: process.env.GOOGLE_APP_PASSWORD,
+  ENCRYPTION_SECRET_KEY: process.env.ENCRYPTION_SECRET_KEY,
 };
 export default config;

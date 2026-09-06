@@ -27,7 +27,7 @@ const pages = [
 const DashNavBar = () => {
   const [showSideBar, setShowSideBar] = useState(false);
   return (
-    <div className="w-full md:px-10 px-5 py-4 border-b border-norway-600/50 flex justify-between items-center ">
+    <div className="w-full md:px-10 px-5 h-16 py-4 border-b border-norway-600/50 flex justify-between items-center ">
       <div className="text-hunter-green-700 md:hidden block">
         <GiHamburgerMenu size={25} onClick={() => setShowSideBar(true)} />
       </div>
