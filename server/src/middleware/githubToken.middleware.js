@@ -1,3 +1,4 @@
+import config from "../config/config.js";
 import GithubConnection from "../models/githubConnection.model.js";
 import { decryption, symmetricEncryption } from "../utils/encryption.js";
 import axios from "axios";
@@ -26,6 +27,7 @@ export const githubToken = async (req, res, next) => {
         message: "Github not connected",
       });
     }
+    console.log("githubConnect", githubConnection);
     const refreshToken = decryption(
       githubConnection.encryptedRefreshToken,
       githubConnection.iv,
@@ -33,13 +35,13 @@ export const githubToken = async (req, res, next) => {
     );
     console.log("Refresh Token", refreshToken);
 
-    const { data } = await axios.post(
+    const response = await axios.post(
       "https://github.com/login/oauth/access_token",
       {
         client_id: config.GITHUB_CLIENT_ID,
         client_secret: config.GITHUB_CLIENT_SECRET,
         grant_type: "refresh_token",
-        refreshToken,
+        refresh_token: refreshToken,
       },
       {
         headers: {
@@ -47,25 +49,29 @@ export const githubToken = async (req, res, next) => {
         },
       },
     );
+    console.log("Data", response.data);
 
-    if (!data.refresh_token || !data.access_token) {
+    if (!response.data.refresh_token || !response.data.access_token) {
       return res
         .status(400)
         .json({ success: false, message: "Token not given by github" });
     }
-    const encryption = symmetricEncryption(data.refresh_token);
+    const encryption = symmetricEncryption(response.data.refresh_token);
+    console.log("encrypt", encryption);
+    console.log("githubConnection", githubConnection);
     githubConnection.encryptedRefreshToken = encryption.encryptedData;
     githubConnection.iv = encryption.iv;
     githubConnection.authTag = encryption.authTag;
+    console.log("started");
     await githubConnection.save();
-
-    req.githubAccessToken = data.access_token;
-
+    console.log("enbded");
+    req.githubAccessToken = response.data.access_token;
+    console.log("acess", req.githubAccessToken);
     next();
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: "github middleware server error",
       error,
     });
   }

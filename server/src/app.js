@@ -7,6 +7,7 @@ import morgan from "morgan";
 import authRouter from "./routes/auth.routes.js";
 import connectDB from "./config/connectDB.js";
 import config from "./config/config.js";
+import githubRouter from "./routes/git.routes.js";
 
 const app = express();
 dotenv.config();
@@ -22,7 +23,7 @@ app.use(cookieParser());
 // Routes
 
 app.use("/api/auth", authRouter);
-app.use("/check", authRouter);
+app.use("/api/git", githubRouter);
 app.head("/", (req, res) => {
   res.status(200).end();
 });

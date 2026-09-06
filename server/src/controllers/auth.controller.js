@@ -11,6 +11,7 @@ import OTP from "../models/otp.model.js";
 import axios from "axios";
 import GithubConnection from "../models/githubConnection.model.js";
 import { symmetricEncryption } from "../utils/encryption.js";
+
 export const register = async (req, res) => {
   console.log(req.firebaseUser);
   let { email, uid } = req.firebaseUser;

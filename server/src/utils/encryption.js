@@ -1,11 +1,11 @@
 import crypto from "crypto";
 import config from "../config/config.js";
 export const symmetricEncryption = (text) => {
-  const iv = crypto.randomBytes(12).toString("hex");
+  const iv = crypto.randomBytes(12)
   const cipher = crypto.createCipheriv(
     "aes-256-gcm",
     Buffer.from(config.ENCRYPTION_SECRET_KEY, "hex"),
-    Buffer.from(iv, "hex"),
+    iv,
   );
 
   let cipherivText = cipher.update(text, "utf8", "hex");
@@ -27,5 +27,5 @@ export const decryption = (cipherivText, iv, authTag) => {
   decipher.setAuthTag(Buffer.from(authTag, "hex"));
   let plainText = decipher.update(cipherivText, "hex", "utf8");
   plainText += decipher.final("utf8");
-  return { plainText };
+  return plainText;
 };
