@@ -2,8 +2,7 @@ import axios from "axios";
 import redisClient from "../config/redisClient.js";
 export const getAllRepositories = async (req, res) => {
   const access_token = req.githubAccessToken;
-  console.log("access:", req.githubAccessToken);
-
+  
   try {
     const cacheKey = `github:repositories:${req.user._id}`;
     const cacheValue = await redisClient.get(cacheKey);

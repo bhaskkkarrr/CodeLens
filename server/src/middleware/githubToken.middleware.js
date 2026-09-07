@@ -23,7 +23,6 @@ export const githubToken = async (req, res, next) => {
 
     const cacheKey = `github:access_token:${userId.toString()}`;
     const cachedValue = await redisClient.get(cacheKey);
-    console.log("Cached:::", cachedValue);
     if (cachedValue) {
       console.log("Cached Token");
       req.githubAccessToken = cachedValue;
@@ -44,7 +43,6 @@ export const githubToken = async (req, res, next) => {
       githubConnection.iv,
       githubConnection.authTag,
     );
-    console.log("Refresh Token", refreshToken);
 
     const response = await axios.post(
       "https://github.com/login/oauth/access_token",
@@ -60,7 +58,6 @@ export const githubToken = async (req, res, next) => {
         },
       },
     );
-    console.log("Data", response.data);
 
     if (!response.data.refresh_token || !response.data.access_token) {
       return res
@@ -70,8 +67,6 @@ export const githubToken = async (req, res, next) => {
 
     const encryption = symmetricEncryption(response.data.refresh_token);
 
-    console.log("encrypt", encryption);
-    console.log("githubConnection", githubConnection);
 
     githubConnection.encryptedRefreshToken = encryption.encryptedData;
     githubConnection.iv = encryption.iv;
@@ -80,14 +75,11 @@ export const githubToken = async (req, res, next) => {
       Date.now() + response.data.refresh_token_expires_in * 1000,
     );
 
-    console.log("started");
     await githubConnection.save();
-    console.log("ended");
 
     await redisClient.set(cacheKey, response.data.access_token);
     await redisClient.expire(cacheKey, 22000);
     req.githubAccessToken = response.data.access_token;
-    console.log("access", req.githubAccessToken);
     next();
   } catch (error) {
     return res.status(500).json({
