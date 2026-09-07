@@ -1,4 +1,5 @@
 import config from "../config/config.js";
+import redisClient from "../config/redisClient.js";
 import GithubConnection from "../models/githubConnection.model.js";
 import { decryption, symmetricEncryption } from "../utils/encryption.js";
 import axios from "axios";
@@ -11,8 +12,7 @@ export const githubToken = async (req, res, next) => {
         message: "User not found",
       });
     }
-    const isConnected = user.gitConnected;
-    if (!isConnected) {
+    if (!user.gitConnected) {
       return res.status(400).json({
         success: false,
         message: "Github not connected",
@@ -20,6 +20,16 @@ export const githubToken = async (req, res, next) => {
     }
 
     const userId = user._id;
+
+    const cacheKey = `github:access_token:${userId.toString()}`;
+    const cachedValue = await redisClient.get(cacheKey);
+    console.log("Cached:::", cachedValue);
+    if (cachedValue) {
+      console.log("Cached Token");
+      req.githubAccessToken = cachedValue;
+      return next();
+    }
+
     const githubConnection = await GithubConnection.findOne({ userId });
     if (!githubConnection) {
       return res.status(400).json({
@@ -28,6 +38,7 @@ export const githubToken = async (req, res, next) => {
       });
     }
     console.log("githubConnect", githubConnection);
+
     const refreshToken = decryption(
       githubConnection.encryptedRefreshToken,
       githubConnection.iv,
@@ -56,17 +67,27 @@ export const githubToken = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Token not given by github" });
     }
+
     const encryption = symmetricEncryption(response.data.refresh_token);
+
     console.log("encrypt", encryption);
     console.log("githubConnection", githubConnection);
+
     githubConnection.encryptedRefreshToken = encryption.encryptedData;
     githubConnection.iv = encryption.iv;
     githubConnection.authTag = encryption.authTag;
+    githubConnection.refreshTokenExpiresAt = new Date(
+      Date.now() + response.data.refresh_token_expires_in * 1000,
+    );
+
     console.log("started");
     await githubConnection.save();
-    console.log("enbded");
+    console.log("ended");
+
+    await redisClient.set(cacheKey, response.data.access_token);
+    await redisClient.expire(cacheKey, 22000);
     req.githubAccessToken = response.data.access_token;
-    console.log("acess", req.githubAccessToken);
+    console.log("access", req.githubAccessToken);
     next();
   } catch (error) {
     return res.status(500).json({

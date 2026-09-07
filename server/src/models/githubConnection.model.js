@@ -19,6 +19,10 @@ const githubConnectionSchema = new mongoose.Schema(
       type: String,
       required: [true, "Auth Tag is required"],
     },
+    refreshTokenExpiresAt: {
+      type: Date,
+      required: [true, "Refresh Token expiry is required"],
+    },
   },
   { timestamps: true },
 );

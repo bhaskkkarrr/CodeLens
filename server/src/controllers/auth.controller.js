@@ -328,7 +328,7 @@ export const connectGithub = async (req, res) => {
     }
 
     const decodedUser = jwt.verify(refreshToken, config.JWT_SECRET);
-    console.log("decode", decodedUser, "\n\n");
+    console.log("decoded", decodedUser, "\n\n");
 
     const user = await User.findById(decodedUser.id);
 
@@ -367,10 +367,13 @@ export const connectGithub = async (req, res) => {
       },
     );
 
-    console.log("respo", tokenResponse.data, "\n\n");
+    console.log("Token response:\n", tokenResponse.data, "\n\n");
 
-    const { access_token: accessToken, refresh_token: githubRefreshToken } =
-      tokenResponse.data;
+    const {
+      access_token: accessToken,
+      refresh_token: githubRefreshToken,
+      refresh_token_expires_in: refreshTokenExpiresAt,
+    } = tokenResponse.data;
 
     if (!accessToken) {
       return res.redirect(
@@ -402,8 +405,12 @@ export const connectGithub = async (req, res) => {
       encryptedRefreshToken: encryptionResponse.encryptedData,
       iv: encryptionResponse.iv,
       authTag: encryptionResponse.authTag,
+      refreshTokenExpiresAt: new Date(
+        Date.now() + refreshTokenExpiresAt * 1000,
+      ),
     });
     console.log("connection", gitConnection, "\n\n");
+    
     user.gitProfile = gitUser.html_url;
     user.gitConnected = true;
 

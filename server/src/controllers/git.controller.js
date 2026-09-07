@@ -1,8 +1,19 @@
 import axios from "axios";
+import redisClient from "../config/redisClient.js";
 export const getAllRepositories = async (req, res) => {
   const access_token = req.githubAccessToken;
-  console.log("access ", req.githubAccessToken);
+  console.log("access:", req.githubAccessToken);
+
   try {
+    const cacheKey = `github:repositories:${req.user._id}`;
+    const cacheValue = await redisClient.get(cacheKey);
+    if (cacheValue) {
+      console.log("Returned response from cache");
+      return res.status(200).json({
+        success: true,
+        repositories: JSON.parse(cacheValue),
+      });
+    }
     const response = await axios.get("https://api.github.com/user/repos", {
       headers: {
         Authorization: `Bearer ${access_token}`,
@@ -25,7 +36,7 @@ export const getAllRepositories = async (req, res) => {
         avatarUrl: repo.owner.avatar_url,
       },
     }));
-    console.log("response", response.data);
+    await redisClient.set(cacheKey, JSON.stringify(repositories));
     return res.status(200).json({
       success: true,
       repositories,
