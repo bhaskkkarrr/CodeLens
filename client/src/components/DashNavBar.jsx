@@ -7,25 +7,34 @@ import { GoRepoForked } from "react-icons/go";
 import logo from "/icon-remove_bg.png";
 import { RxCross2 } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react";
+import { useNavigate } from "react-router";
 const pages = [
   {
-    id: "home",
-    name: "Home",
+    id: "dashboard",
+    name: "Dashboard",
+    url: "/dashboard/",
     icon: <AiFillHome />,
   },
   {
     id: "repositories",
     name: "Repositories",
+    url: "/dashboard/repositories",
     icon: <GoRepoForked />,
   },
   {
     id: "setting",
     name: "Setting",
+    url: "/dashboard/settings",
     icon: <IoMdSettings />,
   },
 ];
 const DashNavBar = () => {
   const [showSideBar, setShowSideBar] = useState(false);
+  const navigate = useNavigate();
+  const currentPath = window.location.pathname;
+  const activeTab = pages.find((page) => {
+    return page.url === currentPath;
+  })?.id;
   return (
     <div className="w-full md:px-10 px-5 h-16 py-4 border-b border-norway-600/50 flex justify-between items-center ">
       <div className="text-hunter-green-700 md:hidden block">
@@ -79,7 +88,15 @@ const DashNavBar = () => {
               {pages.map((page) => (
                 <button
                   key={page.id}
-                  className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-mono text-lg text-norway-800 border border-hunter-green-400/80 transition bg-hunter-green-300/50 shadow-lg shadow-hunter-green-400/50"
+                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-mono text-lg text-norway-800 border border-hunter-green-400/80 transition bg-hunter-green-300/50 shadow-lg shadow-hunter-green-400/50 ${
+                    activeTab === page.id
+                      ? " bg-hunter-green-400/90 text-norway-50"
+                      : " hover:bg-hunter-green-300/50 text-norway-800"
+                  }`}
+                  onClick={() => {
+                    navigate(`${page.url}`);
+                    setShowSideBar(false);
+                  }}
                 >
                   <span className="flex items-center text-lg">{page.icon}</span>
 
