@@ -52,13 +52,13 @@ const DashNavBar = () => {
       <AnimatePresence>
         {showSideBar && (
           <motion.div
-            initial={{ x: -300, opacity: 0.5 }}
-            animate={{ x: 0, opacity: 1 }}
+            initial={{ x: -500 }}
+            animate={{ x: 0 }}
             transition={{
-              duration: 0.5,
+              duration: 0.8,
               ease: "easeInOut",
             }}
-            exit={{ x: -300, opacity: 0.5 }}
+            exit={{ x: -500}}
             className="fixed inset-0 z-999 w-full min-h-screen px-5 py-7 bg-hunter-green-100"
           >
             <div className="mb-10 flex items-center justify-between  gap-3">
