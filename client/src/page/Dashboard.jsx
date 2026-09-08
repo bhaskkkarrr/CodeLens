@@ -1,260 +1,310 @@
-import { useEffect, useState } from "react";
-
-import toast from "react-hot-toast";
-
 import { motion } from "motion/react";
 
 import {
   FaGithub,
-  FaSearch,
-  FaCodeBranch,
-  FaLock,
-  FaGlobe,
   FaArrowRight,
-} from "react-icons/fa";
+  FaCodeBranch,
+  FaFolderOpen,
+  FaComments,
+  FaClock,
+  FaPlus,
+  FaChartSimple,
+} from "react-icons/fa6";
 
 import { useNavigate } from "react-router";
 
 import { useAuth } from "../context/AuthContext";
-
-import { GlobalLoader } from "../components/Loaders";
-
-import { useGithub } from "../context/GitHubContext";
-import { config } from "../config/config";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
   const { user } = useAuth();
 
-  const { getAllRepositories, isGettingRepos, repositories } = useGithub();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const redirectUri = `${config.BACKEND_URL}/api/auth/github-auth`;
-  // Connect GitHub
-  const handleGithubConnect = () => {
-    window.location.href =
-      `https://github.com/login/oauth/authorize?` +
-      `scope=user:email+offline_access&` +
-      `client_id=${config.GITHUB_CLIENT_ID}&` +
-      `redirect_uri=${redirectUri}`;
-  };
-
-  // Handle GitHub OAuth errors
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-
-    const reason = params.get("reason");
-
-    if (!reason) return;
-
-    const errorMessages = {
-      github_already_connected: "GitHub account already connected",
-      missing_refresh_token: "Token not found. GitHub was not connected.",
-      token_failed: "Invalid token. GitHub was not connected.",
-      missing_code: "Authorization code is missing.",
-      invalid_user: "Invalid user.",
-      user_not_logged_in: "Please login first.",
-    };
-
-    toast.error(errorMessages[reason] || "Something went wrong on the server.");
-
-    navigate("/", { replace: true });
-  }, [navigate]);
-
-  // Fetch repositories only when GitHub is connected
-  useEffect(() => {
-    if (user?.gitConnected) {
-      getAllRepositories();
-    }
-  }, [user?.gitConnected]);
-
-  if (!user) {
-    return <GlobalLoader />;
-  }
-
-  const isGitConnected = user.gitConnected;
-
-  // Search repositories
-  const filteredRepositories = repositories?.filter((repo) => {
-    const search = searchQuery.toLowerCase();
-
-    return (
-      repo.name?.toLowerCase().includes(search) ||
-      repo.fullName?.toLowerCase().includes(search) ||
-      repo.language?.toLowerCase().includes(search)
-    );
-  });
-
-  // Handle repository analysis
-  const handleAnalyzeRepository = (repo) => {
-    console.log("Selected repository:", repo);
-
-    /*
-      You can later navigate to an analysis page:
-
-      navigate(`/repository/${repo.id}`);
-
-      Or call your repository import/analyze API here.
-    */
-  };
-
   return (
-    <div className="h-[calc(100vh-64px)] overflow-y-auto px-4 py-8 md:px-8 lg:px-12">
-      {/* GitHub Not Connected */}
-      {!isGitConnected ? (
-        <div className="flex min-h-full items-center justify-center">
-          <div className="flex max-w-md flex-col items-center space-y-6 rounded-2xl border border-hunter-green-200/40 bg-hunter-green-950/20 p-8 text-center shadow-lg shadow-hunter-green-900/20 md:p-12">
-            <div className="rounded-2xl bg-hunter-green-600/15 p-5 text-hunter-green-400">
-              <FaGithub size={45} />
-            </div>
+    <div className="h-[calc(100vh-64px)] overflow-y-auto bg-hunter-green-50 px-4 py-6 md:px-8 md:py-10 lg:px-12">
+      <div className="mx-auto w-full max-w-7xl">
+        {/* Header */}
+        <section className="mb-8 md:mb-10">
+          <p className="mb-2 text-sm font-medium text-hunter-green-700">
+            Welcome back
+          </p>
 
+          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-norway-50">
-                Connect your GitHub
+              <h1 className="text-3xl font-semibold text-hunter-green-950 md:text-4xl">
+                Hello, {user?.username}
               </h1>
 
-              <p className="mt-3 text-gray-400">
-                Connect your GitHub account to explore repositories, analyze
-                code, and chat with your codebase.
+              <p className="mt-3 max-w-xl text-sm leading-relaxed text-hunter-green-700 md:text-base">
+                Explore your repositories and continue understanding your
+                codebases.
               </p>
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.96 }}
-              onClick={handleGithubConnect}
-              className="flex items-center gap-3 rounded-xl bg-hunter-green-600 px-5 py-3 font-mono text-norway-50 transition-colors hover:bg-hunter-green-500"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => navigate("/dashboard/repositories")}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-hunter-green-700 px-5 py-3 text-sm font-medium text-norway-50 shadow-md transition-colors hover:bg-hunter-green-800 md:w-auto"
             >
-              <FaGithub size={20} />
-              Connect GitHub
+              <FaPlus />
+              Explore repositories
             </motion.button>
           </div>
-        </div>
-      ) : isGettingRepos ? (
-        /* Loading */
-        <div className="flex h-full items-center justify-center">
-          <GlobalLoader />
-        </div>
-      ) : (
-        /* Repository Dashboard */
-        <div className="mx-auto w-full max-w-6xl">
-          {/* Header */}
-          <div className="mb-10 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="mb-2 font-mono text-sm text-hunter-green-900/70">
-                Welcome back, {user.username}
-              </p>
+        </section>
 
-              <h1 className="text-3xl font-semibold text-norway-900 md:text-4xl">
-                Your repositories
-              </h1>
+        {/* Quick Stats */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="rounded-xl bg-hunter-green-200 p-3 text-hunter-green-800">
+                <FaFolderOpen size={20} />
+              </div>
 
-              <p className="mt-3 max-w-xl text-hunter-green-900/70">
-                Select a repository to analyze its codebase and start asking
-                questions.
-              </p>
+              <span className="text-sm text-hunter-green-600">
+                Repositories
+              </span>
             </div>
 
-            <div className="flex items-center gap-2 self-start rounded-full border border-hunter-green-400/20 bg-norway-200 px-4 py-2 text-sm text-hunter-green-900 md:self-auto">
-              <span className="h-2 w-2 rounded-full bg-hunter-green-400" />
-              GitHub Connected
-            </div>
-          </div>
+            <p className="mt-5 text-3xl font-semibold text-hunter-green-950">
+              12
+            </p>
 
-          {/* Repository Count */}
-          <div className="mb-5">
-            <p className="text-sm text-hunter-green-900/70">
-              {repositories?.length || 0} repositories found
+            <p className="mt-1 text-sm text-hunter-green-700">
+              Available to explore
             </p>
           </div>
 
-          {/* Repository Cards */}
-          <div className="flex flex-col gap-4 pb-10">
-            {repositories?.length > 0 ? (
-              repositories.map((repo) => (
-                <motion.div
-                  key={repo.id}
-                  whileHover={{ y: -2 }}
-                  className="group rounded-2xl border border-hunter-green-400/15 bg-hunter-green-200 p-5 transition-all hover:border-hunter-green-400 hover:shadow-lg hover:shadow-hunter-green-400"
-                >
-                  <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-                    {/* Repository Information */}
-                    <div className="flex min-w-0 items-start gap-4">
-                      {/* Icon */}
-                      <div className="shrink-0 rounded-xl bg-hunter-green-600/15 p-3 text-hunter-green-400">
-                        <FaGithub size={22} />
-                      </div>
+          <div className="rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-5 shadow-sm">
+            <div className="flex items-center justify-between">
+              <div className="rounded-xl bg-hunter-green-200 p-3 text-hunter-green-800">
+                <FaChartSimple size={20} />
+              </div>
 
-                      {/* Details */}
-                      <div className="min-w-0">
-                        <h2 className="truncate text-lg font-medium text-norway-900 md:text-xl">
-                          {repo.name}
-                        </h2>
+              <span className="text-sm text-hunter-green-600">Analyzed</span>
+            </div>
 
-                        <p className="mt-1 truncate text-sm text-gray-500">
-                          {repo.fullName}
-                        </p>
+            <p className="mt-5 text-3xl font-semibold text-hunter-green-950">
+              4
+            </p>
 
-                        {/* Metadata */}
-                        <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm text-gray-400">
-                          {/* Language */}
-                          {repo.language && (
-                            <div className="flex items-center gap-2">
-                              <span className="h-2 w-2 rounded-full bg-hunter-green-400" />
+            <p className="mt-1 text-sm text-hunter-green-700">
+              Codebases analyzed
+            </p>
+          </div>
 
-                              {repo.language}
-                            </div>
-                          )}
+          <div className="rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-5 shadow-sm sm:col-span-2 lg:col-span-1">
+            <div className="flex items-center justify-between">
+              <div className="rounded-xl bg-hunter-green-200 p-3 text-hunter-green-800">
+                <FaComments size={20} />
+              </div>
 
-                          {/* Default Branch */}
-                          <div className="flex items-center gap-2">
-                            <FaCodeBranch />
+              <span className="text-sm text-hunter-green-600">Questions</span>
+            </div>
 
-                            {repo.defaultBranch}
-                          </div>
+            <p className="mt-5 text-3xl font-semibold text-hunter-green-950">
+              28
+            </p>
 
-                          {/* Visibility */}
-                          <div className="flex items-center gap-2">
-                            {repo.isPrivate ? <FaLock /> : <FaGlobe />}
+            <p className="mt-1 text-sm text-hunter-green-700">
+              Questions asked
+            </p>
+          </div>
+        </section>
 
-                            {repo.isPrivate ? "Private" : "Public"}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Analyze Button */}
-                    <motion.button
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.96 }}
-                      onClick={() => handleAnalyzeRepository(repo)}
-                      className="flex shrink-0 items-center justify-center gap-2 rounded-xl bg-hunter-green-600 px-5 py-3 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-500"
-                    >
-                      Analyze
-                      <FaArrowRight className="transition-transform group-hover:translate-x-1" />
-                    </motion.button>
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              /* Empty Search State */
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-hunter-green-400/10 py-20 text-center">
-                <FaGithub size={40} className="mb-5 text-hunter-green-400/50" />
-
-                <h2 className="text-xl text-norway-50">
-                  No repositories found
+        {/* Main Content */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-3">
+          {/* Recent Repositories */}
+          <section className="rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-5 shadow-sm md:p-6 lg:col-span-2">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-hunter-green-950">
+                  Recent repositories
                 </h2>
 
-                <p className="mt-2 text-sm text-gray-500">
-                  Try searching for a different repository or language.
+                <p className="mt-1 text-sm text-hunter-green-700">
+                  Continue where you left off.
                 </p>
               </div>
-            )}
-          </div>
+
+              <button
+                onClick={() => navigate("/repositories")}
+                className="hidden items-center gap-2 text-sm font-medium text-hunter-green-700 hover:text-hunter-green-950 sm:flex"
+              >
+                View all
+                <FaArrowRight />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {/* Repository Card */}
+              {[
+                {
+                  name: "CodeLens",
+                  language: "JavaScript",
+                  status: "Analyzed",
+                  time: "Last opened today",
+                },
+                {
+                  name: "E-commerce App",
+                  language: "JavaScript",
+                  status: "Ready",
+                  time: "Opened 2 days ago",
+                },
+                {
+                  name: "Portfolio",
+                  language: "React",
+                  status: "Analyzed",
+                  time: "Opened last week",
+                },
+              ].map((repo) => (
+                <motion.div
+                  key={repo.name}
+                  whileHover={{ y: -2 }}
+                  className="group flex flex-col gap-4 rounded-xl border border-hunter-green-300 bg-hunter-green-50 p-4 transition-all hover:border-hunter-green-500 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex min-w-0 items-center gap-4">
+                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-hunter-green-200 text-hunter-green-800">
+                      <FaGithub size={20} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <h3 className="truncate font-semibold text-hunter-green-950">
+                        {repo.name}
+                      </h3>
+
+                      <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-hunter-green-600">
+                        <span>{repo.language}</span>
+
+                        <span className="h-1 w-1 rounded-full bg-hunter-green-400" />
+
+                        <span>{repo.time}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-4 sm:justify-end">
+                    <span className="rounded-full bg-hunter-green-200 px-3 py-1 text-xs font-medium text-hunter-green-800">
+                      {repo.status}
+                    </span>
+
+                    <button className="flex items-center gap-2 text-sm font-medium text-hunter-green-800 hover:text-hunter-green-950">
+                      Open
+                      <FaArrowRight className="transition-transform group-hover:translate-x-1" />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => navigate("/repositories")}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-hunter-green-300 py-3 text-sm font-medium text-hunter-green-800 transition-colors hover:bg-hunter-green-200 sm:hidden"
+            >
+              View all repositories
+              <FaArrowRight />
+            </button>
+          </section>
+
+          {/* Right Column */}
+          <aside className="space-y-6">
+            {/* Quick Actions */}
+            <section className="rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-5 shadow-sm md:p-6">
+              <h2 className="text-xl font-semibold text-hunter-green-950">
+                Quick actions
+              </h2>
+
+              <div className="mt-5 space-y-3">
+                <button
+                  onClick={() => navigate("/repositories")}
+                  className="flex w-full items-center justify-between rounded-xl border border-hunter-green-300 bg-hunter-green-50 p-4 text-left transition-colors hover:bg-hunter-green-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-hunter-green-200 p-2 text-hunter-green-800">
+                      <FaFolderOpen />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium text-hunter-green-950">
+                        Browse repositories
+                      </p>
+
+                      <p className="text-xs text-hunter-green-600">
+                        Select a codebase
+                      </p>
+                    </div>
+                  </div>
+
+                  <FaArrowRight className="text-hunter-green-600" />
+                </button>
+
+                <button className="flex w-full items-center justify-between rounded-xl border border-hunter-green-300 bg-hunter-green-50 p-4 text-left transition-colors hover:bg-hunter-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-lg bg-hunter-green-200 p-2 text-hunter-green-800">
+                      <FaCodeBranch />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-medium text-hunter-green-950">
+                        Connect repository
+                      </p>
+
+                      <p className="text-xs text-hunter-green-600">
+                        Import a new project
+                      </p>
+                    </div>
+                  </div>
+
+                  <FaArrowRight className="text-hunter-green-600" />
+                </button>
+              </div>
+            </section>
+
+            {/* Recent Activity */}
+            <section className="rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-5 shadow-sm md:p-6">
+              <div className="flex items-center gap-2">
+                <FaClock className="text-hunter-green-700" />
+
+                <h2 className="text-lg font-semibold text-hunter-green-950">
+                  Recent activity
+                </h2>
+              </div>
+
+              <div className="mt-5 space-y-5">
+                <div className="border-l-2 border-hunter-green-400 pl-4">
+                  <p className="text-sm font-medium text-hunter-green-950">
+                    Repository analyzed
+                  </p>
+
+                  <p className="mt-1 text-xs text-hunter-green-600">
+                    CodeLens • Today
+                  </p>
+                </div>
+
+                <div className="border-l-2 border-hunter-green-300 pl-4">
+                  <p className="text-sm font-medium text-hunter-green-950">
+                    Asked a question
+                  </p>
+
+                  <p className="mt-1 text-xs text-hunter-green-600">
+                    E-commerce App • Yesterday
+                  </p>
+                </div>
+
+                <div className="border-l-2 border-hunter-green-300 pl-4">
+                  <p className="text-sm font-medium text-hunter-green-950">
+                    GitHub connected
+                  </p>
+
+                  <p className="mt-1 text-xs text-hunter-green-600">
+                    Account • 3 days ago
+                  </p>
+                </div>
+              </div>
+            </section>
+          </aside>
         </div>
-      )}
+      </div>
     </div>
   );
 };

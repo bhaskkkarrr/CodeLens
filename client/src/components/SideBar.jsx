@@ -4,26 +4,31 @@ import { GoRepoForked } from "react-icons/go";
 import logo from "/icon-remove_bg.png";
 import { FaUser } from "react-icons/fa";
 import { FaChevronUp } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
 const pages = [
   {
     id: "home",
     name: "Home",
+    url: "/dashboard/",
     icon: <AiFillHome />,
   },
   {
     id: "repositories",
     name: "Repositories",
+    url: "/dashboard/repositories",
     icon: <GoRepoForked />,
   },
   {
     id: "setting",
     name: "Setting",
+    url: "/dashboard/settings",
     icon: <IoMdSettings />,
   },
 ];
 
 const SideBar = () => {
+  const navigate = useNavigate();
   return (
     <aside className="min-h-screen w-full border-r border-norway-700/30 bg-linear-to-tl  from-norway-100 to-hunter-green-200">
       <div className="flex min-h-screen flex-col px-5 py-6 md:px-8">
@@ -52,6 +57,7 @@ const SideBar = () => {
             <button
               key={page.id}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-mono text-base text-norway-800 transition hover:bg-hunter-green-300/50"
+              onClick={() => navigate(`${page.url}`)}
             >
               <span className="flex items-center text-lg">{page.icon}</span>
 

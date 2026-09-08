@@ -9,6 +9,8 @@ import Dashboard from "./page/Dashboard";
 import { useAuth } from "./context/AuthContext";
 import Page404 from "./page/Page404";
 import { FullScreenLoader } from "./components/Loaders";
+import Settings from "./page/Settings";
+import Repositories from "./page/Repositories";
 const App = () => {
   const { token, isAuthenticating } = useAuth();
 
@@ -44,6 +46,8 @@ const App = () => {
         {!isAuthenticating && token && (
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
+            <Route path="/dashboard/repositories" element={<Repositories />} />
+            <Route path="/dashboard/settings" element={<Settings />} />
           </Route>
         )}
 

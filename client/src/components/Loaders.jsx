@@ -19,3 +19,11 @@ export const GlobalLoader = () => {
     </div>
   );
 };
+
+export const RepoLoader = () => {
+  return (
+    <div className="animate-spin duration-200 text-norway-900 ">
+      <BiLoaderAlt size={30} />
+    </div>
+  );
+};
