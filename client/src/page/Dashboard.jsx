@@ -20,6 +20,7 @@ import { useAuth } from "../context/AuthContext";
 import { GlobalLoader } from "../components/Loaders";
 
 import { useGithub } from "../context/GitHubContext";
+import { config } from "../config/config";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -29,13 +30,15 @@ const Dashboard = () => {
   const { getAllRepositories, isGettingRepos, repositories } = useGithub();
 
   const [searchQuery, setSearchQuery] = useState("");
-
+  
+  const redirectUri = `${config.BACKEND_URL}/api/auth/github-auth`;
   // Connect GitHub
   const handleGithubConnect = () => {
     window.location.href =
       `https://github.com/login/oauth/authorize?` +
       `scope=user:email+offline_access&` +
-      `client_id=${import.meta.env.VITE_GITHUB_CLIENT_ID}`;
+      `client_id=${config.GITHUB_CLIENT_ID}&` +
+      `redirect_uri=${redirectUri}`;
   };
 
   // Handle GitHub OAuth errors
