@@ -164,7 +164,7 @@ const Dashboard = () => {
                   className="group flex flex-col gap-4 rounded-xl border border-hunter-green-300 bg-hunter-green-50 p-4 transition-all hover:border-hunter-green-500 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="flex min-w-0 items-center gap-4">
-                    <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-hunter-green-200 text-hunter-green-800">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-hunter-green-200 text-hunter-green-800">
                       <FaGithub size={20} />
                     </div>
 
@@ -198,7 +198,7 @@ const Dashboard = () => {
             </div>
 
             <button
-              onClick={() => navigate("/repositories")}
+              onClick={() => navigate("/dashboard/repositories")}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl border border-hunter-green-300 py-3 text-sm font-medium text-hunter-green-800 transition-colors hover:bg-hunter-green-200 sm:hidden"
             >
               View all repositories

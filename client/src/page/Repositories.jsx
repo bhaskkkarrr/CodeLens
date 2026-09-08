@@ -115,7 +115,12 @@ const Repositories = () => {
 
   return (
     <div className="h-[calc(100vh-64px)] overflow-y-auto w-full bg-hunter-green-50">
-      <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:px-8 md:py-8 lg:px-12 lg:py-10">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.45 }}
+        className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:px-8 md:py-8 lg:px-12"
+      >
         {/* ============================= */}
         {/* GITHUB NOT CONNECTED */}
         {/* ============================= */}
@@ -133,30 +138,19 @@ const Repositories = () => {
               }}
               className="w-full max-w-md rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-6 text-center shadow-lg shadow-hunter-green-900/10 sm:p-8 md:p-10"
             >
-              {/* Icon */}
-
               <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-hunter-green-200 text-hunter-green-800">
                 <FaGithub size={38} />
               </div>
 
-              {/* Content */}
-
               <h1 className="mt-7 text-2xl font-semibold text-hunter-green-950 md:text-3xl">
                 Connect your GitHub
               </h1>
-
               <p className="mx-auto mt-3 max-w-sm text-sm leading-relaxed text-hunter-green-700 md:text-base">
                 Connect your GitHub account to explore your repositories, import
                 codebases, and start asking questions about your code.
               </p>
 
-              {/* Benefits */}
-
-              <div className="mt-7 space-y-3 text-left">
-                <div className="rounded-xl border border-hunter-green-300 bg-hunter-green-50 px-4 py-3 text-sm text-hunter-green-800">
-                  Explore your repositories
-                </div>
-
+              <div className="mt-5 space-y-2 text-left">
                 <div className="rounded-xl border border-hunter-green-300 bg-hunter-green-50 px-4 py-3 text-sm text-hunter-green-800">
                   Import repositories for analysis
                 </div>
@@ -165,8 +159,6 @@ const Repositories = () => {
                   Chat with your codebase
                 </div>
               </div>
-
-              {/* Connect Button */}
 
               <motion.button
                 whileHover={{
@@ -184,23 +176,11 @@ const Repositories = () => {
             </motion.div>
           </div>
         ) : isGettingRepos ? (
-          /* ============================= */
-          /* LOADING */
-          /* ============================= */
-
           <div className="flex min-h-[calc(100vh-128px)] items-center justify-center">
             <RepoLoader />
           </div>
         ) : (
-          /* ============================= */
-          /* REPOSITORIES */
-          /* ============================= */
-
           <div>
-            {/* ============================= */}
-            {/* HEADER */}
-            {/* ============================= */}
-
             <div className="mb-8 flex flex-col gap-5 md:mb-10 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="mb-2 font-mono text-xs uppercase tracking-wider text-hunter-green-600 sm:text-sm">
@@ -217,21 +197,12 @@ const Repositories = () => {
                 </p>
               </div>
 
-              {/* GitHub Status */}
-
               <div className="flex w-fit items-center gap-2 rounded-full border border-hunter-green-300 bg-hunter-green-100 px-4 py-2 text-sm font-medium text-hunter-green-800">
                 <span className="h-2 w-2 rounded-full bg-hunter-green-600" />
                 GitHub Connected
               </div>
             </div>
-
-            {/* ============================= */}
-            {/* SEARCH AND COUNT */}
-            {/* ============================= */}
-
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              {/* Search */}
-
               <div className="relative w-full sm:max-w-md">
                 <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-sm text-hunter-green-600" />
 
@@ -253,8 +224,6 @@ const Repositories = () => {
                 )}
               </div>
 
-              {/* Count */}
-
               <p className="shrink-0 text-sm text-hunter-green-700">
                 <span className="font-semibold text-hunter-green-950">
                   {filteredRepositories.length}
@@ -265,22 +234,21 @@ const Repositories = () => {
               </p>
             </div>
 
-            {/* ============================= */}
-            {/* REPOSITORY LIST */}
-            {/* ============================= */}
-
             {filteredRepositories.length > 0 ? (
               <div className="flex flex-col gap-4 pb-8">
-                {filteredRepositories.map((repo) => (
+                {filteredRepositories.map((repo, idx) => (
                   <motion.div
                     key={repo.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
                     whileHover={{
                       y: -3,
                     }}
                     transition={{
-                      duration: 0.2,
+                      duration: 0.5,
+                      delay: 0.1 * idx,
                     }}
-                    className="group rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-4 shadow-sm transition-all hover:border-hunter-green-500 hover:shadow-lg hover:shadow-hunter-green-900/10 sm:p-5"
+                    className="group rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-4 shadow-sm hover:border-hunter-green-500 hover:shadow-lg hover:shadow-hunter-green-900/10 sm:p-5"
                   >
                     <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                       {/* Repository Information */}
@@ -390,7 +358,7 @@ const Repositories = () => {
             )}
           </div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 };

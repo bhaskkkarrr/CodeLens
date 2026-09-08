@@ -5,11 +5,12 @@ import logo from "/icon-remove_bg.png";
 import { FaUser } from "react-icons/fa";
 import { FaChevronUp } from "react-icons/fa";
 import { useNavigate } from "react-router";
+import { useState } from "react";
 
 const pages = [
   {
-    id: "home",
-    name: "Home",
+    id: "dashboard",
+    name: "Dashboard",
     url: "/dashboard/",
     icon: <AiFillHome />,
   },
@@ -29,6 +30,7 @@ const pages = [
 
 const SideBar = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("dashboard");
   return (
     <aside className="min-h-screen w-full border-r border-norway-700/30 bg-linear-to-tl  from-norway-100 to-hunter-green-200">
       <div className="flex min-h-screen flex-col px-5 py-6 md:px-8">
@@ -56,8 +58,15 @@ const SideBar = () => {
           {pages.map((page) => (
             <button
               key={page.id}
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-mono text-base text-norway-800 transition hover:bg-hunter-green-300/50"
-              onClick={() => navigate(`${page.url}`)}
+              className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-mono text-base  transition  ${
+                activeTab === page.id
+                  ? "bg-hunter-green-700 text-norway-50"
+                  : " hover:bg-hunter-green-300/50 text-norway-800"
+              }`}
+              onClick={() => {
+                navigate(`${page.url}`);
+                setActiveTab(page.id);
+              }}
             >
               <span className="flex items-center text-lg">{page.icon}</span>
 
