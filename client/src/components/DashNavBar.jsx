@@ -8,6 +8,7 @@ import logo from "/icon-remove_bg.png";
 import { RxCross2 } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "react-router";
+import { useAuth } from "../context/AuthContext";
 const pages = [
   {
     id: "dashboard",
@@ -29,6 +30,7 @@ const pages = [
   },
 ];
 const DashNavBar = () => {
+  const { user } = useAuth();
   const [showSideBar, setShowSideBar] = useState(false);
   const navigate = useNavigate();
   const currentPath = window.location.pathname;
@@ -44,7 +46,7 @@ const DashNavBar = () => {
         CodeLens
       </div>
       <div className="md:text-xl font-semibold text-norway-800 hidden md:block ">
-        Overview
+        Hello, {user?.username}
       </div>
       <div className="text-hunter-green-100 rounded-2xl p-2 bg-hunter-green-700">
         <FaUser size={20} />
@@ -58,7 +60,7 @@ const DashNavBar = () => {
               duration: 0.8,
               ease: "easeInOut",
             }}
-            exit={{ x: -500}}
+            exit={{ x: -500 }}
             className="fixed inset-0 z-999 w-full min-h-screen px-5 py-7 bg-hunter-green-100"
           >
             <div className="mb-10 flex items-center justify-between  gap-3">

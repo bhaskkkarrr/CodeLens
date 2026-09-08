@@ -23,35 +23,6 @@ const Dashboard = () => {
   return (
     <div className="h-[calc(100vh-64px)] overflow-y-auto bg-hunter-green-50 px-4 py-6 md:px-8 md:py-10 lg:px-12">
       <div className="mx-auto w-full max-w-7xl">
-        {/* Header */}
-        <section className="mb-8 md:mb-10">
-          <p className="mb-2 text-sm font-medium text-hunter-green-700">
-            Welcome back
-          </p>
-
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <h1 className="text-3xl font-semibold text-hunter-green-950 md:text-4xl">
-                Hello, {user?.username}
-              </h1>
-
-              <p className="mt-3 max-w-xl text-sm leading-relaxed text-hunter-green-700 md:text-base">
-                Explore your repositories and continue understanding your
-                codebases.
-              </p>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => navigate("/dashboard/repositories")}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-hunter-green-700 px-5 py-3 text-sm font-medium text-norway-50 shadow-md transition-colors hover:bg-hunter-green-800 md:w-auto"
-            >
-              <FaPlus />
-              Explore repositories
-            </motion.button>
-          </div>
-        </section>
 
         {/* Quick Stats */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

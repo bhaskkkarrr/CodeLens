@@ -11,7 +11,7 @@ import OTP from "../models/otp.model.js";
 import axios from "axios";
 import GithubConnection from "../models/githubConnection.model.js";
 import { symmetricEncryption } from "../utils/encryption.js";
-
+import redisClient from "../config/redisClient.js";
 export const register = async (req, res) => {
   console.log(req.firebaseUser);
   let { email, uid } = req.firebaseUser;
@@ -61,6 +61,7 @@ export const register = async (req, res) => {
         credits: user.credits,
         gitConnected: user.gitConnected,
         gitProfile: user.gitProfile,
+        profilePic: user.profilePic,
       },
       emailSent: emailResponse.success,
     });
@@ -101,6 +102,7 @@ export const login = async (req, res) => {
           credits: isUser.credits,
           gitConnected: isUser.gitConnected,
           gitProfile: isUser.gitProfile,
+          profilePic: isUser.profilePic,
         },
       });
     } else {
@@ -167,6 +169,7 @@ export const firebaseAuth = async (req, res) => {
           credits: user.credits,
           gitConnected: user.gitConnected,
           gitProfile: user.gitProfile,
+          profilePic: user.profilePic,
         },
       });
     } else {
@@ -259,6 +262,7 @@ export const me = async (req, res) => {
         credits: user.credits,
         gitConnected: user.gitConnected,
         gitProfile: user.gitProfile,
+        profilePic: user.profilePic,
       },
     });
   } catch (error) {
@@ -410,7 +414,7 @@ export const connectGithub = async (req, res) => {
       ),
     });
     console.log("connection", gitConnection, "\n\n");
-    
+
     user.gitProfile = gitUser.html_url;
     user.gitConnected = true;
 
@@ -424,6 +428,60 @@ export const connectGithub = async (req, res) => {
     );
 
     return res.redirect("http://localhost:5173/dashboard?reason=server_error");
+  }
+};
+
+export const disconnectGithub = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const isUser = await User.findById(user._id);
+    if (!isUser) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user",
+      });
+    }
+    console.log("user", isUser);
+    // const githubConnect = await GithubConnection.findOne({
+    //   userId: isUser._id,
+    // });
+    const githubConnect = await GithubConnection.findOne({
+      $and: [{ userId: isUser._id, revoked: false }],
+    });
+    console.log("githubConnection", githubConnect);
+    if (!githubConnect) {
+      return res.status(400).json({
+        success: false,
+        message: "Github Connection not found",
+      });
+    }
+
+    githubConnect.revoked = true;
+
+    await githubConnect.save();
+    await redisClient.del(`github:repositories:${user._id}`);
+    await redisClient.del(`github:access_token:${user._id}`);
+    isUser.gitConnected = false;
+    isUser.gitProfile = null;
+    await isUser.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Github disconnected successfully",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error while disconnecting github",
+      error,
+    });
   }
 };
 

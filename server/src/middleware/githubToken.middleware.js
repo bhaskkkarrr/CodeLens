@@ -29,7 +29,10 @@ export const githubToken = async (req, res, next) => {
       return next();
     }
 
-    const githubConnection = await GithubConnection.findOne({ userId });
+    const githubConnection = await GithubConnection.findOne({
+      $and: [{ userId, revoked: false }],
+    });
+
     if (!githubConnection) {
       return res.status(400).json({
         success: false,
@@ -66,7 +69,6 @@ export const githubToken = async (req, res, next) => {
     }
 
     const encryption = symmetricEncryption(response.data.refresh_token);
-
 
     githubConnection.encryptedRefreshToken = encryption.encryptedData;
     githubConnection.iv = encryption.iv;

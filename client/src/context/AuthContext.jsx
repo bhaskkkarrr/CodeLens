@@ -13,11 +13,13 @@ import {
 } from "../services/firebaseAuth";
 import { axiosInstance } from "../services/axiosInstance";
 import toast from "react-hot-toast";
+
 export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   function tokenAndUser(data) {
     setToken(data.token);
@@ -192,11 +194,34 @@ export const AuthProvider = ({ children }) => {
       setIsAuthenticating(false);
     }
   };
+
   useEffect(() => {
     getAccessToken();
   }, []);
+
   console.log("User", user);
-  console.log("Token", token);
+
+  const githubDisconnect = async () => {
+    try {
+      setIsDisconnecting(true);
+      const res = await axiosInstance.get("/api/auth/disconnect-github", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (res.data.success) {
+        await getAccessToken();
+        toast.success("Github disconnected successfully ");
+      }
+    } catch (error) {
+      toast.error(
+        error.response.message || error.response.data || "Something went wrong",
+      );
+    } finally {
+      setIsDisconnecting(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -204,7 +229,9 @@ export const AuthProvider = ({ children }) => {
         gitHubSubmit,
         emailRegisterSubmit,
         emailLoginSubmit,
+        githubDisconnect,
         isAuthenticating,
+        isDisconnecting,
         verifyOTP,
         token,
         user,

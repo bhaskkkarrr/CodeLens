@@ -7,6 +7,7 @@ const githubConnectionSchema = new mongoose.Schema(
       required: [true, "User ID is required"],
     },
     githubId: { type: String, required: [true, "Github ID is required"] },
+    revoked: { type: Boolean, default: false },
     encryptedRefreshToken: {
       type: String,
       required: [true, "Refresh Token hash is required"],
