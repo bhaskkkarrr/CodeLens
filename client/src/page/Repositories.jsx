@@ -27,7 +27,7 @@ import { config } from "../config/config";
 const Repositories = () => {
   const navigate = useNavigate();
 
-  const { user } = useAuth();
+  const { user, token } = useAuth();
 
   const { getAllRepositories, isGettingRepos, repositories } = useGithub();
 
@@ -83,7 +83,6 @@ const Repositories = () => {
   if (!user) {
     return <GlobalLoader />;
   }
-
   const isGitConnected = user.gitConnected;
 
   // Filter repositories
