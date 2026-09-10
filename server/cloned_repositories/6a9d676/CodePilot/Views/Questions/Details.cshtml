@@ -1,0 +1,52 @@
+﻿@model CodePilot.Models.Question
+
+@{
+    ViewData["Title"] = "Question Details";
+}
+
+<h2>@Model.Title</h2>
+
+<div>
+    <h3>Description</h3>
+    <p>@Model.Description</p>
+</div>
+
+<div>
+    <h3>Sample Input</h3>
+@*     //<pre>@Model.SampleInput</pre>
+ *@</div>
+
+<div>
+    <h3>Sample Output</h3>
+@*     <pre>@Model.SampleOutput</pre>
+ *@</div>
+
+<hr />
+
+<form asp-action="SubmitCode" method="post">
+@*     <input type="hidden" name="QuestionId" value="@Model.Id" />
+ *@
+    <div class="form-group">
+        <label for="language">Language:</label>
+        <select id="language" name="Language" class="form-control">
+            <option value="python">Python</option>
+            <option value="csharp">C#</option>
+            <option value="javascript">JavaScript</option>
+            <!-- Add more languages as needed -->
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="code">Code:</label>
+        <textarea id="code" name="Code" rows="10" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+@if (ViewBag.Result != null)
+{
+    <hr />
+    <h3>Output</h3>
+    <pre>@ViewBag.Result</pre>
+}

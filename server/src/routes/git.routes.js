@@ -12,4 +12,6 @@ githubRouter.get(
   gitControllers.getAllRepositories,
 );
 
+githubRouter.post("/clone", isVerified, githubToken, gitControllers.cloneRepository)
+
 export default githubRouter;

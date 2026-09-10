@@ -7,8 +7,9 @@ import { useAuth } from "./AuthContext";
 
 export const GithubContext = createContext();
 export const GithubProvider = ({ children }) => {
-  const { token, isAuthLoading } = useAuth();
+  const { token } = useAuth();
   const [isGettingRepos, setIsGettingRepos] = useState(false);
+  const [isImportingRepository, setIsImportingRepository] = useState(false);
   const [repositories, setRepositories] = useState(null);
   const getAllRepositories = async () => {
     try {
@@ -28,21 +29,39 @@ export const GithubProvider = ({ children }) => {
     }
   };
   useEffect(() => {
-    if (isAuthLoading) {
-      return;
-    }
-
     if (!token) {
       return;
     }
 
     getAllRepositories();
-  }, [isAuthLoading, token]);
+  }, [token]);
+
+  const repositoryImport = async (id) => {
+    try {
+      setIsImportingRepository(true);
+      const res = await axiosInstance.post("/api/git/clone", {
+        repoId: id,
+      });
+      if(res.success){
+        toast.success("Repository cloned successfully")
+      }
+    } catch (error) {
+      toast.error(
+        error?.response?.message ||
+          error?.response?.data ||
+          error.message ||
+          "Something went wrong",
+      );
+    } finally {
+      setIsImportingRepository(false);
+    }
+  };
 
   return (
     <GithubContext.Provider
       value={{
         getAllRepositories,
+        repositoryImport,
         isGettingRepos,
         repositories,
       }}

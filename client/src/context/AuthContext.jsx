@@ -19,7 +19,6 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
 
   function tokenAndUser(data) {
@@ -297,7 +296,6 @@ export const AuthProvider = ({ children }) => {
         emailLoginSubmit,
         githubDisconnect,
         isAuthenticating,
-        isAuthLoading,
         isDisconnecting,
         verifyOTP,
         token,

@@ -1,8 +1,9 @@
 import axios from "axios";
 import redisClient from "../config/redisClient.js";
+import simpleGit from "simple-git";
 export const getAllRepositories = async (req, res) => {
   const access_token = req.githubAccessToken;
-  
+
   try {
     const cacheKey = `github:repositories:${req.user._id}`;
     const cacheValue = await redisClient.get(cacheKey);
@@ -45,6 +46,56 @@ export const getAllRepositories = async (req, res) => {
       success: false,
       message: "get all repositories server error",
       error,
+    });
+  }
+};
+
+export const cloneRepository = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    const githubAccessToken = req.githubAccessToken;
+    if (!githubAccessToken) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid access token",
+      });
+    }
+    const repoId = req.body.repoId;
+
+    const repository = await axios.get(
+      `https://api.github.com/repositories/${repoId}`,
+      {
+        headers: { Authorization: `Bearer ${githubAccessToken}` },
+      },
+    );
+    console.log("Repository", repository.data.clone_url);
+    const repoURL = repository.data.clone_url;
+    if (!repoURL) {
+      return res.status(400).json({
+        success: false,
+        message: "Repository url not found",
+      });
+    }
+    const git = simpleGit();
+
+    const localPath = `cloned_repositories/${user._id.toString().slice(0, 7)}`;
+
+    await git.clone(repoURL, localPath);
+    return res.status(200).json({
+      success: true,
+      message: "Repository cloned successfully ",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Server error while cloning repository",
     });
   }
 };

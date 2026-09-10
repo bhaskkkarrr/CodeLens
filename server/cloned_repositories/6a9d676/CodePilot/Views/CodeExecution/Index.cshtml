@@ -1,0 +1,22 @@
+﻿@model IEnumerable<Question>
+
+@{
+    ViewData["Title"] = "Questions";
+}
+
+<h1>Questions</h1>
+
+<form asp-action="SubmitCode" method="post">
+    <select name="questionId">
+        @foreach (var question in Model)
+        {
+            <option value="@question.QuestionId">@question.Title</option>
+        }
+    </select>
+    <textarea name="code" rows="10" cols="50"></textarea>
+    <select name="language">
+        <option value="python">Python</option>
+        <option value="csharp">C#</option>
+    </select>
+    <button type="submit">Submit</button>
+</form>

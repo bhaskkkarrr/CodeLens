@@ -100,16 +100,9 @@ const Repositories = () => {
     }) || [];
 
   // Handle repository import
-  const handleAnalyzeRepository = (repo) => {
-    console.log("Selected repository:", repo);
-
-    /*
-      Later:
-
-      navigate(`/repository/${repo.id}`);
-
-      Or call your import API here.
-    */
+  const handleRepositoryImport = async (repo) => {
+    console.log("Selected repository:", repo.id);
+    await repositoryImport();
   };
 
   return (
@@ -120,10 +113,6 @@ const Repositories = () => {
         transition={{ duration: 0.45 }}
         className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 md:px-8 md:py-8 lg:px-12"
       >
-        {/* ============================= */}
-        {/* GITHUB NOT CONNECTED */}
-        {/* ============================= */}
-
         {!isGitConnected ? (
           <div className="flex min-h-[calc(100vh-128px)] items-center justify-center">
             <motion.div
@@ -315,7 +304,15 @@ const Repositories = () => {
                         whileTap={{
                           scale: 0.97,
                         }}
-                        onClick={() => handleAnalyzeRepository(repo)}
+                        onClick={() => {
+                          if (repo.isPrivate) {
+                            toast.error(
+                              "Private repositories cannot be cloned",
+                            );
+                          } else {
+                            handleRepositoryImport(repo);
+                          }
+                        }}
                         className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-hunter-green-700 px-5 py-3 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-800 sm:w-auto"
                       >
                         Import

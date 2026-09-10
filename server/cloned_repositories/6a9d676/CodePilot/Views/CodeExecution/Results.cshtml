@@ -1,0 +1,29 @@
+﻿@model IEnumerable<TestCaseResult>
+
+@{
+    ViewData["Title"] = "Test Results";
+}
+
+<h1>Test Results</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Input</th>
+            <th>Expected Output</th>
+            <th>Actual Output</th>
+            <th>Result</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var result in Model)
+        {
+            <tr>
+                <td>@result.Input</td>
+                <td>@result.ExpectedOutput</td>
+                <td>@result.ActualOutput</td>
+                <td>@(result.IsCorrect ? "Pass" : "Fail")</td>
+            </tr>
+        }
+    </tbody>
+</table>
