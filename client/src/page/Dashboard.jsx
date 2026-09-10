@@ -23,7 +23,6 @@ const Dashboard = () => {
   return (
     <div className="h-[calc(100vh-64px)] overflow-y-auto bg-hunter-green-50 px-4 py-6 md:px-8 md:py-10 lg:px-12">
       <div className="mx-auto w-full max-w-7xl">
-
         {/* Quick Stats */}
         <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div className="rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-5 shadow-sm">

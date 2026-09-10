@@ -6,6 +6,7 @@ import { FaUser } from "react-icons/fa";
 import { FaChevronUp } from "react-icons/fa";
 import { useLocation, useNavigate } from "react-router";
 import { act, useEffect, useState } from "react";
+import { IoMdChatboxes } from "react-icons/io";
 
 const pages = [
   {
@@ -19,6 +20,12 @@ const pages = [
     name: "Repositories",
     url: "/dashboard/repositories",
     icon: <GoRepoForked />,
+  },
+  {
+    id: "conversation",
+    name: "Conversation",
+    url: "/dashboard/conversation",
+    icon: <IoMdChatboxes />,
   },
   {
     id: "setting",
