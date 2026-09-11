@@ -29,7 +29,14 @@ const Repositories = () => {
 
   const { user, token } = useAuth();
 
-  const { getAllRepositories, isGettingRepos, repositories } = useGithub();
+  const {
+    getAllRepositories,
+    repositoryImport,
+    isGettingRepos,
+    isImportingRepository,
+    repositories,
+    selectedRepository,
+  } = useGithub();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -102,8 +109,9 @@ const Repositories = () => {
   // Handle repository import
   const handleRepositoryImport = async (repo) => {
     console.log("Selected repository:", repo.id);
-    await repositoryImport();
+    await repositoryImport(repo.id);
   };
+  console.log("Selected", selectedRepository);
 
   return (
     <div className="h-[calc(100vh-64px)] overflow-y-auto w-full bg-hunter-green-50">
@@ -313,7 +321,8 @@ const Repositories = () => {
                             handleRepositoryImport(repo);
                           }
                         }}
-                        className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-hunter-green-700 px-5 py-3 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-800 sm:w-auto"
+                        className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-hunter-green-700 px-5 py-3 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-800 sm:w-auto disabled:cursor-progress disabled:bg-hunter-green-300"
+                        disabled={isImportingRepository}
                       >
                         Import
                         <FaArrowRight className="transition-transform group-hover:translate-x-1" />

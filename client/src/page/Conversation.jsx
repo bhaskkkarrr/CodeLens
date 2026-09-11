@@ -18,12 +18,13 @@ import {
 
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
+import { useGithub } from "../context/GitHubContext";
 
 const Conversation = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const [selectedRepo, setSelectedRepo] = useState("CodeLens");
+  const { selectedRepository } = useGithub();
+  console.log("Selected repo", selectedRepository);
   const [question, setQuestion] = useState("");
 
   const repositories = [
@@ -112,7 +113,7 @@ const Conversation = () => {
                 </div>
 
                 <h3 className="mt-5 text-lg font-semibold text-hunter-green-950">
-                  Ask anything about {selectedRepo}
+                  Ask anything about {selectedRepository?.name}
                 </h3>
 
                 <p className="mt-2 max-w-md text-sm leading-6 text-hunter-green-700">
@@ -154,7 +155,7 @@ const Conversation = () => {
                     }
                   }}
                   rows={1}
-                  placeholder={`Ask about ${selectedRepo}...`}
+                  placeholder={`Ask about ${selectedRepository?.name}...`}
                   className="max-h-32 min-h-10.5 flex-1 resize-none bg-transparent px-3 py-2.5 text-sm text-hunter-green-950 outline-none placeholder:text-hunter-green-500"
                 />
 

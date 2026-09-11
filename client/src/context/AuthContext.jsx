@@ -279,9 +279,14 @@ export const AuthProvider = ({ children }) => {
         toast.success("Github disconnected successfully ");
       }
     } catch (error) {
-      toast.error(
-        error.response.message || error.response.data || "Something went wrong",
-      );
+      console.error("Disconnecting repo error:", error);
+
+      const message =
+        error?.response?.data?.message ||
+        error?.message ||
+        "Something went wrong";
+
+      toast.error(message);
     } finally {
       setIsDisconnecting(false);
     }
