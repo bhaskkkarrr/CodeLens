@@ -88,7 +88,7 @@ export const cloneRepository = async (req, res) => {
         headers: { Authorization: `Bearer ${githubAccessToken}` },
       },
     );
-    console.log("Repository", repository.data);
+    console.log("Repository", repository.data.clone_url);
     const repoURL = repository.data.clone_url;
     if (!repoURL) {
       return res.status(400).json({
@@ -99,14 +99,28 @@ export const cloneRepository = async (req, res) => {
     const git = simpleGit();
 
     const localPath = `../../cloned_repositories/${user._id.toString().slice(0, 7)}/${repository.data.name.toString() + Date.now()}`;
-
     try {
+      console.log("BEFORE CLONE");
+      console.log("repoURL:", repoURL);
+      console.log("localPath:", localPath);
+
       await git.clone(repoURL, localPath);
+      const aiResponse = await axios.post(
+        "http://127.0.0.1:8000/ai/repository/load",
+        {
+          repositoryPath: localPath,
+        },
+      );
+      console.log("AI: \n", aiResponse);
+
+      console.log("AFTER CLONE");
     } catch (error) {
+      console.error("CLONE ERROR:", error);
+
       return res.status(400).json({
         success: false,
-        message: "Repository cloned error ",
-        error,
+        message: "Repository clone error",
+        error: error.message,
       });
     }
 

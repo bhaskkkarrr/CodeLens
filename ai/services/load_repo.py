@@ -30,8 +30,8 @@ IGNORED_DIRECTORIES = {
 }
 
 
-async def load_repo(repository_path):
-
+async def load(repository_path):
+    print("PATH", repository_path)
     documents = []
 
     root = Path(repository_path)
@@ -55,7 +55,7 @@ async def load_repo(repository_path):
             )
 
             relative_path = file_path.relative_to(root)
-
+            print("file name:",file_path.name)
             documents.append(
                 Document(
                     page_content=content,
@@ -72,26 +72,23 @@ async def load_repo(repository_path):
             continue
 
 
-        print(f"Loaded {len(documents)} files")
-
-        splitter = RecursiveCharacterTextSplitter(chunk_size = 2000, chunk_overlap = 200 )
-
-        chunks = splitter.split_documents(documents)
-        print(f"Chunks: {len(chunks)}")
-
-        try:
-          vector_store = Chroma.from_documents(
-              documents=chunks,
-              embedding=embedding_model,
-              persist_directory='./db'
-          )
-          return {
-              "success":True,
-              "message":"Repository cloned successfully"
-          }
-
-        except:
-            return {
-                "success":True,
-                "message":"Repository cloned successfully"
-            }
+    print(f"Loaded {len(documents)} files")
+    
+    splitter = RecursiveCharacterTextSplitter(chunk_size = 2000, chunk_overlap = 200 )
+    chunks = splitter.split_documents(documents)
+    print(f"Chunks: {len(chunks)}")
+    try:
+        vector_store = Chroma.from_documents(
+        documents=chunks,
+        embedding=embedding_model,
+        persist_directory='./db'
+        )
+        return {
+        "success":True,
+        "message":"Repository cloned successfully"
+        }
+    except:
+        return {
+        "success":False,
+        "message":"Repository cloning unsuccessful"
+        }    

@@ -2,4 +2,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class repositoryPathUrl(BaseModel):
-  path:str
+  repositoryPath:str
+
+class query(BaseModel):
+  question:str  
