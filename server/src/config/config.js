@@ -46,6 +46,9 @@ if (!process.env.ENCRYPTION_SECRET_KEY) {
 if (!process.env.REDIS_URL) {
   throw new Error("No REDIS_URL found in environment variables");
 }
+if (!process.env.AI_API) {
+  throw new Error("No AI_API found in environment variables");
+}
 
 const config = {
   GITHUB_CLIENT_ID: process.env.GITHUB_CLIENT_ID,
@@ -63,5 +66,6 @@ const config = {
   GOOGLE_APP_PASSWORD: process.env.GOOGLE_APP_PASSWORD,
   ENCRYPTION_SECRET_KEY: process.env.ENCRYPTION_SECRET_KEY,
   REDIS_URL: process.env.REDIS_URL,
+  AI_API: process.env.AI_API,
 };
 export default config;

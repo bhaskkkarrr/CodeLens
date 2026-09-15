@@ -8,6 +8,7 @@ import authRouter from "./routes/auth.routes.js";
 import connectDB from "./config/connectDB.js";
 import config from "./config/config.js";
 import githubRouter from "./routes/git.routes.js";
+import ragRouter from "./routes/rag.routes.js";
 
 const app = express();
 dotenv.config();
@@ -24,6 +25,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/git", githubRouter);
+app.use("/api/rag", ragRouter);
 app.head("/", (req, res) => {
   res.status(200).end();
 });

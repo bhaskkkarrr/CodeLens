@@ -6,3 +6,6 @@ class repositoryPathUrl(BaseModel):
 
 class query(BaseModel):
   question:str  
+
+class AI_Response_Structure(BaseModel):
+  response:str  

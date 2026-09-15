@@ -2,7 +2,8 @@ from langchain_chroma import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_mistralai import ChatMistralAI
-import os
+from langchain_openrouter import ChatOpenRouter
+from model.models import AI_Response_Structure
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -24,9 +25,12 @@ retriever = vector_store.as_retriever(
   },
 )
 
-llm = ChatMistralAI(
-  model = 'mistral-small-2506'
+llm = ChatOpenRouter(
+  model="auto",
+  max_tokens=300
 )
+
+structured_llm = llm.with_structured_output(AI_Response_Structure)
 
 rag_system_prompt = """
 You are CodeLens, an AI assistant for understanding and analyzing software repositories.
@@ -230,20 +234,9 @@ Be:
 - structured
 - developer-friendly
 
-Use Markdown, headings, bullets, numbered steps, diagrams, and code blocks when useful.
+do not use Markdown, headings, bullets, numbered steps, diagrams, and code blocks when useful just use plain texts
 
 Do not unnecessarily repeat limitations or begin every answer with "Based on the context provided."
-
-## 12. SOURCES
-
-End repository-specific answers with:
-
-### Sources
-
-- `path/to/file1`
-- `path/to/file2`
-
-Only include files that actually contributed to the answer.
 
 ## FINAL RULE
 
@@ -284,10 +277,12 @@ def retriever_response(query):
     'context' : context,
     'question' : query
   })
+  print("Context:", context)
   print("Retrieved documents:", len(docs))
   print("Context length:", len(context))
-  print("Prompt length:", len(main_prompt))
 
-  # llm_response = llm.invoke(final_prompt)
+  # llm_response = structured_llm.invoke(final_prompt)
+  llm_response = {"response":"CodePilot"}
+  print("LLM", llm_response)
+  return llm_response
 
-  # print("AI Response: \n", llm_response.content)
