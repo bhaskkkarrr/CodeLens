@@ -1,13 +1,9 @@
 from services.retriever import retriever_response
 
-async def ask_question(query):
+async def ask_question(query,repo_id):
   try:
-    response = retriever_response(query)
-    return {
-      "success":True,
-      "message":"AI response generated successfully",
-      "response":response
-    }
+    response = retriever_response(query,repo_id)
+    return response
   except Exception as e:
         print("ERROR:", repr(e))
 

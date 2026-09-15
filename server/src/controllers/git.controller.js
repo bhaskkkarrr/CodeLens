@@ -66,6 +66,7 @@ export const cloneRepository = async (req, res) => {
       userId: user._id,
       githubRepoId: repoId,
     });
+
     if (repo) {
       return res.status(200).json({
         success: true,
@@ -109,9 +110,10 @@ export const cloneRepository = async (req, res) => {
         "http://127.0.0.1:8000/ai/repository/load",
         {
           repositoryPath: localPath,
+          repo_id: repoId,
         },
       );
-      console.log("AI: \n", aiResponse);
+      console.log("AI: \n", aiResponse.data);
 
       console.log("AFTER CLONE");
     } catch (error) {
@@ -144,6 +146,7 @@ export const cloneRepository = async (req, res) => {
       message: "Repository cloned successfully ",
       repoId: newRepoClone.githubRepoId,
     });
+
   } catch (error) {
     console.log("Error", error);
     return res.status(500).json({

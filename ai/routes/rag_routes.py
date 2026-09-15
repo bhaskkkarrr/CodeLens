@@ -1,9 +1,9 @@
 from fastapi import APIRouter
-from model.models import query
+from model.models import RAGQuestionRequest
 from services.controllers import ask_question
 ragRouter = APIRouter()
 
 @ragRouter.post('/question')
-async def question(data:query):
-  response = await ask_question(data.question)
+async def question(data:RAGQuestionRequest):
+  response = await ask_question(data.question, data.repo_id)
   return response

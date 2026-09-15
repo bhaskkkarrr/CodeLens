@@ -1,11 +1,14 @@
 from pydantic import BaseModel, Field
 from typing import Optional
 
-class repositoryPathUrl(BaseModel):
+class RepositoryVectorDBRequest(BaseModel):
   repositoryPath:str
+  repo_id:str
 
-class query(BaseModel):
+class RAGQuestionRequest(BaseModel):
   question:str  
+  repo_id:str
 
 class AI_Response_Structure(BaseModel):
   response:str  
+  source:list[str]

@@ -7,7 +7,7 @@ from langchain_chroma import Chroma
 
 embedding_model = HuggingFaceEmbeddings(
     model_name = "BAAI/bge-small-en-v1.5"
-    )
+)
 
 SUPPORTED_EXTENSIONS = {
     ".js",
@@ -30,7 +30,7 @@ IGNORED_DIRECTORIES = {
 }
 
 
-async def load(repository_path):
+async def load(repository_path,repo_id):
     print("PATH", repository_path)
     documents = []
 
@@ -63,7 +63,8 @@ async def load(repository_path):
                         "file_path": str(relative_path),
                         "file_name": file_path.name,
                         "extension": file_path.suffix,
-                        "repository_path": repository_path
+                        "repository_path": repository_path,
+                        "repository_id":repo_id
                     }
                 )
             )
@@ -79,16 +80,16 @@ async def load(repository_path):
     print(f"Chunks: {len(chunks)}")
     try:
         vector_store = Chroma.from_documents(
-        documents=chunks,
-        embedding=embedding_model,
-        persist_directory='./db'
+            documents=chunks,
+            embedding=embedding_model,
+            persist_directory='./db'
         )
         return {
-        "success":True,
-        "message":"Repository cloned successfully"
+            "success":True,
+            "message":"Repository cloned successfully"
         }
     except:
         return {
-        "success":False,
-        "message":"Repository cloning unsuccessful"
+            "success":False,
+            "message":"Repository cloning unsuccessful"
         }    

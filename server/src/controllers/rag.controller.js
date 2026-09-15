@@ -1,5 +1,6 @@
 import config from "../config/config.js";
 import axios from "axios";
+import RepositoryModel from "../models/githubRepository.model.js";
 export const ask_questions = async (req, res) => {
   const query = req.body.query;
   if (!query) {
@@ -8,19 +9,46 @@ export const ask_questions = async (req, res) => {
       message: "No question asked",
     });
   }
-  console.log("Query", query);
+  const user = req.user;
+  if (!user) {
+    return res.status(400).json({
+      success: false,
+      message: "No question asked",
+    });
+  }
 
+  const repoId = req.body.repoId;
+  if (!repoId) {
+    return res.status(400).json({
+      success: false,
+      message: "Repo id is required",
+    });
+  }
   try {
+    const connectedRepos = await RepositoryModel.find({
+      userId: user._id,
+      githubRepoId: repoId,
+    });
+
+    if (connectedRepos.length == 0) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to this repository",
+      });
+    }
+    console.log("ConnectedRepos", connectedRepos);
+
     const ai_response = await axios.post(`${config.AI_API}/ai/rag/question`, {
+      repo_id: repoId,
       question: query,
     });
-    const reponse_data = ai_response.data
+    const reponse_data = ai_response.data;
     console.log("RES:", reponse_data);
     if (reponse_data.success) {
       return res.status(200).json({
         success: true,
         message: "AI response generated successfully",
-        response: reponse_data.response.response,
+        response: reponse_data.response,
       });
     } else {
       return res.status(400).json({

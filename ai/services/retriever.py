@@ -3,27 +3,11 @@ from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_mistralai import ChatMistralAI
 from langchain_openrouter import ChatOpenRouter
+from services.get_retriever import get_retriever
 from model.models import AI_Response_Structure
 from dotenv import load_dotenv
 load_dotenv()
 
-embedding_model = HuggingFaceEmbeddings(
-  model_name = "BAAI/bge-small-en-v1.5"
-)
-
-vector_store = Chroma(
-  persist_directory='db',
-  embedding_function=embedding_model
-)
-
-retriever = vector_store.as_retriever(
-  search_type = 'mmr',
-  search_kwargs = {
-    'k' : 4,
-    'fetch_k' : 10,
-    'lambda_mult' : 0.5
-  },
-)
 
 llm = ChatOpenRouter(
   model="auto",
@@ -237,6 +221,9 @@ Be:
 do not use Markdown, headings, bullets, numbered steps, diagrams, and code blocks when useful just use plain texts
 
 Do not unnecessarily repeat limitations or begin every answer with "Based on the context provided."
+## SOURCE
+in list of sources give exact path of the files whose context you have used to give the answer like 
+  src/routes/auth.routes.js ,etc.
 
 ## FINAL RULE
 
@@ -260,7 +247,10 @@ main_prompt = ChatPromptTemplate.from_messages([
     """)
 ])
 
-def retriever_response(query):
+def retriever_response(query,repo_id):
+
+  retriever = get_retriever(repo_id)
+
   if len(query) == 0:
     return {
       "success":False,
@@ -268,7 +258,13 @@ def retriever_response(query):
     }
   
   docs = retriever.invoke(query)
-
+  if(len(docs) <= 0):
+    return {
+      "success":False,
+      "message" :"No data found in Vector Database",
+      "response" : None
+    }
+  
   context = "".join(
     [doc.page_content for doc in docs]
   )
@@ -282,7 +278,11 @@ def retriever_response(query):
   print("Context length:", len(context))
 
   llm_response = structured_llm.invoke(final_prompt)
-  # llm_response = {"response":"CodePilot"}
+  # llm_response = {"response":"Success"}
   print("LLM", llm_response)
-  return llm_response
+  return {
+    "success":True,
+    "message":"AI response generated successfully",
+    "response":llm_response
+  }
 
