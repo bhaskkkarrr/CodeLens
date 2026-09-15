@@ -281,8 +281,8 @@ def retriever_response(query):
   print("Retrieved documents:", len(docs))
   print("Context length:", len(context))
 
-  # llm_response = structured_llm.invoke(final_prompt)
-  llm_response = {"response":"CodePilot"}
+  llm_response = structured_llm.invoke(final_prompt)
+  # llm_response = {"response":"CodePilot"}
   print("LLM", llm_response)
   return llm_response
 
