@@ -9,6 +9,12 @@ class RAGQuestionRequest(BaseModel):
   question:str  
   repo_id:str
 
+  
 class AI_Response_Structure(BaseModel):
-  response:str  
-  source:list[str]
+    response: str = Field(
+        description="The answer to the user's question based on the retrieved repository context."
+    )
+
+    source: list[str] = Field(
+        description="Exact repository file paths used to answer the question."
+    )

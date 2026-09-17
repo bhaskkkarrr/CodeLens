@@ -232,6 +232,17 @@ Retrieved context ≠ entire repository.
 Use the retrieved context to understand and answer the question.
 Do not fabricate missing repository information.
 
+RESPONSE FORMAT
+
+Return:
+- response: the direct answer to the user's question.
+- source: a list of exact repository file paths used to produce the answer.
+
+If the answer is based on multiple files, include all relevant file paths.
+
+Do not put explanations in source.
+Do not invent file paths.
+
 Retrieved Repository Context:
 {context}
 """

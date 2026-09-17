@@ -1,6 +1,9 @@
 import config from "../config/config.js";
 import axios from "axios";
 import RepositoryModel from "../models/githubRepository.model.js";
+import redisClient from "../config/redisClient.js";
+import { response } from "express";
+
 export const ask_questions = async (req, res) => {
   const query = req.body.query;
   if (!query) {
@@ -9,6 +12,7 @@ export const ask_questions = async (req, res) => {
       message: "No question asked",
     });
   }
+
   const user = req.user;
   if (!user) {
     return res.status(400).json({
@@ -24,6 +28,17 @@ export const ask_questions = async (req, res) => {
       message: "Repo id is required",
     });
   }
+  const cacheKey = `rag:${user._id}:${repoId}:${query.trim()}`;
+  const cacheValue = await redisClient.get(cacheKey);
+  if (cacheValue) {
+    const parsedCache = JSON.parse(cacheValue);
+    return res.status(200).json({
+      success: true,
+      message: "Response cached ",
+      response: parsedCache,
+    });
+  }
+
   try {
     const connectedRepos = await RepositoryModel.find({
       userId: user._id,
@@ -42,9 +57,12 @@ export const ask_questions = async (req, res) => {
       repo_id: repoId,
       question: query,
     });
+
     const reponse_data = ai_response.data;
     console.log("RES:", reponse_data);
     if (reponse_data.success) {
+      await redisClient.set(cacheKey, JSON.stringify(reponse_data.response));
+      await redisClient.expire(cacheKey, 300);
       return res.status(200).json({
         success: true,
         message: "AI response generated successfully",

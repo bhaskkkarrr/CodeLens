@@ -31,6 +31,7 @@ export const GithubProvider = ({ children }) => {
       setIsGettingRepos(false);
     }
   };
+  
   useEffect(() => {
     if (!token) {
       return;

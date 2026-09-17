@@ -1,24 +1,20 @@
 fastapi
 uvicorn
-
 python-dotenv
-
 pydantic
 
 langchain
 langchain-core
 langchain-community
-langchain_chroma
+langchain-chroma
+
 langchain-openai
 langchain-mistralai
 langchain-openrouter
 langchain-ollama
-langchain_huggingface
-
+langchain-huggingface
 
 sentence-transformers
 huggingface-hub
 
 tavily-python
-
-

@@ -2,6 +2,7 @@ import axios from "axios";
 import redisClient from "../config/redisClient.js";
 import simpleGit from "simple-git";
 import RepositoryModel from "../models/githubRepository.model.js";
+import config from "../config/config.js";
 export const getAllRepositories = async (req, res) => {
   const access_token = req.githubAccessToken;
 
@@ -89,7 +90,9 @@ export const cloneRepository = async (req, res) => {
         headers: { Authorization: `Bearer ${githubAccessToken}` },
       },
     );
-    console.log("Repository", repository.data.clone_url);
+
+    console.log("Repository", repository.data);
+
     const repoURL = repository.data.clone_url;
     if (!repoURL) {
       return res.status(400).json({
@@ -101,23 +104,27 @@ export const cloneRepository = async (req, res) => {
 
     const localPath = `../../cloned_repositories/${user._id.toString().slice(0, 7)}/${repository.data.name.toString() + Date.now()}`;
     try {
-      console.log("BEFORE CLONE");
-      console.log("repoURL:", repoURL);
-      console.log("localPath:", localPath);
 
+      console.log("Entered ");
+      console.log("PATH:", localPath);
       await git.clone(repoURL, localPath);
       const aiResponse = await axios.post(
-        "http://127.0.0.1:8000/ai/repository/load",
+        `${config.AI_API}/ai/repository/load`,
         {
           repositoryPath: localPath,
-          repo_id: repoId,
+          repo_id: repoId.toString(),
         },
       );
       console.log("AI: \n", aiResponse.data);
 
       console.log("AFTER CLONE");
     } catch (error) {
-      console.error("CLONE ERROR:", error);
+      console.log("CLONE ERROR:", error.message);
+
+      console.log(
+        "PYTHON ERROR:",
+        JSON.stringify(error.response?.data, null, 2),
+      );
 
       return res.status(400).json({
         success: false,
@@ -146,7 +153,6 @@ export const cloneRepository = async (req, res) => {
       message: "Repository cloned successfully ",
       repoId: newRepoClone.githubRepoId,
     });
-
   } catch (error) {
     console.log("Error", error);
     return res.status(500).json({
