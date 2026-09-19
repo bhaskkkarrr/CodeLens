@@ -108,14 +108,14 @@ export const cloneRepository = async (req, res) => {
       console.log("Entered ");
       console.log("PATH:", localPath);
       await git.clone(repoURL, localPath);
-      const aiResponse = await axios.post(
-        `${config.AI_API}/ai/repository/load`,
-        {
-          repositoryPath: localPath,
-          repo_id: repoId.toString(),
-        },
-      );
-      console.log("AI: \n", aiResponse.data);
+      // const aiResponse = await axios.post(
+      //   `${config.AI_API}/ai/repository/load`,
+      //   {
+      //     repositoryPath: localPath,
+      //     repo_id: repoId.toString(),
+      //   },
+      // );
+      // console.log("AI: \n", aiResponse.data);
 
       console.log("AFTER CLONE");
     } catch (error) {
