@@ -12,6 +12,9 @@ import axios from "axios";
 import GithubConnection from "../models/githubConnection.model.js";
 import { symmetricEncryption } from "../utils/encryption.js";
 import redisClient from "../config/redisClient.js";
+import RepositoryModel from "../models/githubRepository.model.js";
+import Conversation from "../models/conversations.model.js";
+
 export const register = async (req, res) => {
   console.log(req.firebaseUser);
   let { email, uid } = req.firebaseUser;
@@ -217,7 +220,7 @@ export const me = async (req, res) => {
       .createHash("sha256")
       .update(refreshToken)
       .digest("hex");
-      
+
     console.log("HASHED: ", refreshTokenHash);
     const session = await Session.findOne({
       userId: user._id,
@@ -443,21 +446,10 @@ export const disconnectGithub = async (req, res) => {
       });
     }
 
-    const isUser = await User.findById(user._id);
-    if (!isUser) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid user",
-      });
-    }
-    console.log("user", isUser);
-    // const githubConnect = await GithubConnection.findOne({
-    //   userId: isUser._id,
-    // });
     const githubConnect = await GithubConnection.findOne({
-      $and: [{ userId: isUser._id, revoked: false }],
+      $and: [{ userId: user._id, revoked: false }],
     });
-    console.log("githubConnection", githubConnect);
+
     if (!githubConnect) {
       return res.status(400).json({
         success: false,
@@ -465,14 +457,24 @@ export const disconnectGithub = async (req, res) => {
       });
     }
 
+    await RepositoryModel.deleteMany({
+      userId: user._id,
+    });
+
+    await Conversation.deleteMany({
+      userId: user._id,
+    });
+
+    await redisClient.del(`rag:chats:${user._id}`);
+
     githubConnect.revoked = true;
 
     await githubConnect.save();
     await redisClient.del(`github:repositories:${user._id}`);
     await redisClient.del(`github:access_token:${user._id}`);
-    isUser.gitConnected = false;
-    isUser.gitProfile = null;
-    await isUser.save();
+    user.gitConnected = false;
+    user.gitProfile = null;
+    await user.save();
 
     return res.status(200).json({
       success: true,

@@ -23,11 +23,6 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    lastUsedRepo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "RepositoryModel",
-      default: null,
-    },
     profilePic: { type: String, default: null },
     gitProfile: { type: String, default: null },
     credits: {

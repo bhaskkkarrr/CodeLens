@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   IoMdSettings,
@@ -15,6 +15,7 @@ import { FiChevronRight } from "react-icons/fi";
 import logo from "/icon-remove_bg.png";
 
 import { useLocation, useNavigate } from "react-router";
+import { useRAG } from "../context/RAGContext";
 
 const pages = [
   {
@@ -93,7 +94,7 @@ const conversations = [
 const SideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { getAllChats, allChats, selectedChat } = useRAG();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const activePage = pages.find((page) => {
@@ -111,6 +112,10 @@ const SideBar = () => {
     navigate(url);
     setIsMobileOpen(false);
   };
+  console.log("Chats", allChats);
+  useEffect(() => {
+    getAllChats();
+  }, []);
 
   return (
     <>
@@ -143,7 +148,7 @@ const SideBar = () => {
           <IoMdMenu size={24} />
         </button>
       </div>
-      
+
       {isMobileOpen && (
         <button
           type="button"
@@ -158,7 +163,7 @@ const SideBar = () => {
           fixed left-0 top-0 z-50 h-screen
           w-[320px] shrink-0
           border-r border-norway-700/20
-          bg-gradient-to-b from-norway-50 via-norway-50 to-hunter-green-100
+          bg-linear-to-b from-norway-50 via-norway-50 to-hunter-green-100
           shadow-xl shadow-norway-950/10
           transition-transform duration-300 ease-out
           lg:sticky lg:z-30 lg:block lg:translate-x-0 lg:shadow-none
@@ -269,25 +274,28 @@ const SideBar = () => {
             {/* =================================================
                 CONVERSATIONS
             ================================================== */}
-            <section className="mt-8 flex min-h-0 flex-1 flex-col">
-              <div className="mb-3 flex items-center justify-between px-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-norway-600/70">
-                  Conversations
-                </p>
+            {allChats && (
+              <section className="mt-8 flex min-h-0 flex-1 flex-col">
+                <div className="mb-3 flex items-center justify-between px-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-norway-600/70">
+                    Conversations
+                  </p>
 
-                <span className="rounded-full bg-hunter-green-200 px-2 py-0.5 text-[10px] font-semibold text-hunter-green-800">
-                  {conversations.length}
-                </span>
-              </div>
+                  <span className="rounded-full bg-hunter-green-200 px-2 py-0.5 text-[10px] font-semibold text-hunter-green-800">
+                    {allChats?.length}
+                  </span>
+                </div>
 
-              <div className="min-h-0 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-hunter-green-500">
-                <div className="flex flex-col gap-1">
-                  {conversations.map((convo) => (
-                    <button
-                      key={convo.id}
-                      type="button"
-                      onClick={() => handleNavigation(convo.url)}
-                      className="
+                <div className="min-h-0 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-hunter-green-500">
+                  <div className="flex flex-col gap-1">
+                    {allChats?.map((chat) => (
+                      <button
+                        key={chat.chatCode}
+                        type="button"
+                        onClick={() =>
+                          handleNavigation(`/dashboard/c/${chat.chatCode}`)
+                        }
+                        className="
                         group flex w-full items-center gap-3
                         rounded-xl px-3 py-2.5
                         text-left text-sm
@@ -296,26 +304,21 @@ const SideBar = () => {
                         hover:bg-hunter-green-200/70
                         hover:text-norway-950
                       "
-                    >
-                      {/* Conversation indicator */}
-                      <span
-                        className="
-                          h-1.5 w-1.5 shrink-0 rounded-full
-                          bg-hunter-green-500
-                          opacity-50
-                          transition-all
-                          group-hover:h-2
-                          group-hover:w-2
-                          group-hover:opacity-100
-                        "
-                      />
+                      >
+                        {/* Conversation indicator */}
+                        <span
+                          className={`h-1.5 w-1.5 shrink-0 rounded-full bg-hunter-green-500 transition-all group-hover:h-2 group-hover:w-2 group-hover:opacity-100 ${selectedChat?.githubRepoId === chat?.githubRepoId ? "opacity-100 w-2 h-2" : "opacity-50"}`}
+                        />
 
-                      <span className="truncate font-medium">{convo.name}</span>
-                    </button>
-                  ))}
+                        <span className="truncate font-medium">
+                          {chat.title}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
+            )}
           </div>
 
           <div className="mt-5 border-t border-norway-700/15 pt-4">
