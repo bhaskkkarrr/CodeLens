@@ -48,7 +48,7 @@ const App = () => {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="/dashboard/repositories" element={<Repositories />} />
-            <Route path="/dashboard/conversation" element={<Conversation />} />
+            <Route path="/dashboard/c/:conversationId" element={<Conversation />} />
             <Route path="/dashboard/settings" element={<Settings />} />
           </Route>
         )}

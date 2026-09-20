@@ -4,6 +4,7 @@ import { createContext } from "react";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../services/axiosInstance";
 import { useAuth } from "./AuthContext";
+import { useNavigate } from "react-router";
 export const GithubContext = createContext();
 export const GithubProvider = ({ children }) => {
   const { token } = useAuth();
@@ -11,7 +12,7 @@ export const GithubProvider = ({ children }) => {
   const [isImportingRepository, setIsImportingRepository] = useState(false);
   const [selectedRepository, setSelectedRepository] = useState(null);
   const [repositories, setRepositories] = useState(null);
-
+  const navigate = useNavigate();
   const getAllRepositories = async () => {
     try {
       const res = await axiosInstance.get("/api/git/repositories", {
@@ -53,6 +54,7 @@ export const GithubProvider = ({ children }) => {
       );
       if (res.data.success) {
         toast.success("Repository selected");
+        navigate(`/dashboard/c/${res.data.conversation.chatCode}`)
         setSelectedRepository(repo);
         return {
           success: true,

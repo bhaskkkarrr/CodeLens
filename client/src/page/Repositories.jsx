@@ -14,7 +14,7 @@ import {
   FaTimes,
 } from "react-icons/fa";
 
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 import { useAuth } from "../context/AuthContext";
 
@@ -109,11 +109,9 @@ const Repositories = () => {
 
   // Handle repository import
   const handleRepositoryImport = async (repo) => {
-    const res = await repositoryImport(repo);
-    if(res.success){
-      navigate('/dashboard/conversation')
-    }
+    await repositoryImport(repo);
   };
+
   console.log("Global Selected Repository: ", selectedRepository);
 
   return (

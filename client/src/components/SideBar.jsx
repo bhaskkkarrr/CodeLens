@@ -30,12 +30,6 @@ const pages = [
     icon: <GoRepoForked />,
   },
   {
-    id: "conversation",
-    name: "Conversation",
-    url: "/dashboard/conversation",
-    icon: <IoMdChatboxes />,
-  },
-  {
     id: "setting",
     name: "Settings",
     url: "/dashboard/settings",
@@ -47,12 +41,12 @@ const conversations = [
   {
     id: "auth",
     name: "Auth",
-    url: "/dashboard/conversation",
+    url: "/dashboard/conversation/c",
   },
   {
     id: "codepilot",
     name: "CodePilot",
-    url: "/dashboard/conversation",
+    url: "/dashboard/conversation/c",
   },
   {
     id: "blinkit",
