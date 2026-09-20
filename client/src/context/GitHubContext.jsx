@@ -34,16 +34,16 @@ export const GithubProvider = ({ children }) => {
       setIsGettingRepos(false);
     }
   };
-  
-  const repositoryImport = async (id) => {
-    console.log(id);
+
+  const repositoryImport = async (repo) => {
+    console.log("Selected Repo", repo);
     try {
       setIsImportingRepository(true);
 
       const res = await axiosInstance.post(
         "/api/git/clone",
         {
-          repoId: id,
+          repoId: repo.id,
         },
         {
           headers: {
@@ -52,8 +52,11 @@ export const GithubProvider = ({ children }) => {
         },
       );
       if (res.data.success) {
-        toast.success(res.data.message);
-        setSelectedRepository(res.data.repoId);
+        toast.success("Repository selected");
+        setSelectedRepository(repo);
+        return {
+          success: true,
+        };
       }
     } catch (error) {
       console.error("Repository import error:", error);
@@ -64,6 +67,9 @@ export const GithubProvider = ({ children }) => {
         "Something went wrong";
 
       toast.error(message);
+      return {
+        success: false,
+      };
     } finally {
       setIsImportingRepository(false);
     }

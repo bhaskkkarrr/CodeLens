@@ -37,6 +37,7 @@ const Repositories = () => {
     repositories,
     selectedRepository,
   } = useGithub();
+  const [selectedRepositoryId, setSelectedRepositoryId] = useState(null);
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -108,10 +109,12 @@ const Repositories = () => {
 
   // Handle repository import
   const handleRepositoryImport = async (repo) => {
-    console.log("Selected repository:", repo.id);
-    await repositoryImport(repo.id);
+    const res = await repositoryImport(repo);
+    if(res.success){
+      navigate('/dashboard/conversation')
+    }
   };
-  console.log("Selected", selectedRepository);
+  console.log("Global Selected Repository: ", selectedRepository);
 
   return (
     <div className="h-[calc(100vh-64px)] overflow-y-auto w-full bg-hunter-green-50">
@@ -232,104 +235,111 @@ const Repositories = () => {
 
             {filteredRepositories.length > 0 ? (
               <div className="flex flex-col gap-4 pb-8">
-                {filteredRepositories.map((repo, idx) => (
-                  <motion.div
-                    key={repo.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    whileHover={{
-                      y: -3,
-                    }}
-                    transition={{
-                      duration: 0.5,
-                      delay: 0.1 * idx,
-                    }}
-                    className="group rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-4 shadow-sm hover:border-hunter-green-500 hover:shadow-lg hover:shadow-hunter-green-900/10 sm:p-5"
-                  >
-                    <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-                      {/* Repository Information */}
+                {filteredRepositories.map((repo, idx) => {
+                  return (
+                    <motion.div
+                      key={repo.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      whileHover={{
+                        y: -3,
+                      }}
+                      transition={{
+                        duration: 0.5,
+                        delay: 0.1 * idx,
+                      }}
+                      className="group rounded-2xl border border-hunter-green-300 bg-hunter-green-100 p-4 shadow-sm hover:border-hunter-green-500 hover:shadow-lg hover:shadow-hunter-green-900/10 sm:p-5"
+                    >
+                      <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                        {/* Repository Information */}
 
-                      <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                        {/* GitHub Icon */}
+                        <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+                          {/* GitHub Icon */}
 
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-hunter-green-200 text-hunter-green-800 sm:h-12 sm:w-12">
-                          <FaGithub size={21} />
-                        </div>
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-hunter-green-200 text-hunter-green-800 sm:h-12 sm:w-12">
+                            <FaGithub size={21} />
+                          </div>
 
-                        {/* Repository Details */}
+                          {/* Repository Details */}
 
-                        <div className="min-w-0 flex-1">
-                          <h2 className="truncate text-base font-semibold text-hunter-green-950 sm:text-lg md:text-xl">
-                            {repo.name}
-                          </h2>
+                          <div className="min-w-0 flex-1">
+                            <h2 className="truncate text-base font-semibold text-hunter-green-950 sm:text-lg md:text-xl">
+                              {repo.name}
+                            </h2>
 
-                          <p className="mt-1 truncate text-xs text-hunter-green-600 sm:text-sm">
-                            {repo.fullName}
-                          </p>
+                            <p className="mt-1 truncate text-xs text-hunter-green-600 sm:text-sm">
+                              {repo.fullName}
+                            </p>
 
-                          {/* Metadata */}
+                            {/* Metadata */}
 
-                          <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-hunter-green-700 sm:text-sm">
-                            {/* Language */}
+                            <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-hunter-green-700 sm:text-sm">
+                              {/* Language */}
 
-                            {repo.language && (
+                              {repo.language && (
+                                <div className="flex items-center gap-2">
+                                  <span className="h-2 w-2 rounded-full bg-hunter-green-500" />
+
+                                  {repo.language}
+                                </div>
+                              )}
+
+                              {/* Branch */}
+
+                              {repo.defaultBranch && (
+                                <div className="flex items-center gap-2">
+                                  <FaCodeBranch />
+
+                                  <span className="max-w-32 truncate">
+                                    {repo.defaultBranch}
+                                  </span>
+                                </div>
+                              )}
+
+                              {/* Visibility */}
+
                               <div className="flex items-center gap-2">
-                                <span className="h-2 w-2 rounded-full bg-hunter-green-500" />
+                                {repo.isPrivate ? <FaLock /> : <FaGlobe />}
 
-                                {repo.language}
+                                {repo.isPrivate ? "Private" : "Public"}
                               </div>
-                            )}
-
-                            {/* Branch */}
-
-                            {repo.defaultBranch && (
-                              <div className="flex items-center gap-2">
-                                <FaCodeBranch />
-
-                                <span className="max-w-32 truncate">
-                                  {repo.defaultBranch}
-                                </span>
-                              </div>
-                            )}
-
-                            {/* Visibility */}
-
-                            <div className="flex items-center gap-2">
-                              {repo.isPrivate ? <FaLock /> : <FaGlobe />}
-
-                              {repo.isPrivate ? "Private" : "Public"}
                             </div>
                           </div>
                         </div>
+
+                        {/* Import Button */}
+
+                        <motion.button
+                          whileHover={{
+                            scale: 1.03,
+                          }}
+                          whileTap={{
+                            scale: 0.97,
+                          }}
+                          onClick={() => {
+                            if (repo.isPrivate) {
+                              toast.error(
+                                "Private repositories cannot be cloned",
+                              );
+                            } else {
+                              setSelectedRepositoryId(repo.id);
+                              handleRepositoryImport(repo);
+                            }
+                          }}
+                          className={`flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-800 sm:w-auto disabled:cursor-progress ${
+                            selectedRepositoryId === repo.id
+                              ? "bg-hunter-green-300"
+                              : "bg-hunter-green-700"
+                          }`}
+                          disabled={isImportingRepository}
+                        >
+                          Select
+                          <FaArrowRight className="transition-transform group-hover:translate-x-1" />
+                        </motion.button>
                       </div>
-
-                      {/* Import Button */}
-
-                      <motion.button
-                        whileHover={{
-                          scale: 1.03,
-                        }}
-                        whileTap={{
-                          scale: 0.97,
-                        }}
-                        onClick={() => {
-                          if (repo.isPrivate) {
-                            toast.error(
-                              "Private repositories cannot be cloned",
-                            );
-                          } else {
-                            handleRepositoryImport(repo);
-                          }
-                        }}
-                        className="flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-hunter-green-700 px-5 py-3 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-800 sm:w-auto disabled:cursor-progress disabled:bg-hunter-green-300"
-                        disabled={isImportingRepository}
-                      >
-                        Import
-                        <FaArrowRight className="transition-transform group-hover:translate-x-1" />
-                      </motion.button>
-                    </div>
-                  </motion.div>
-                ))}
+                    </motion.div>
+                  );
+                })}
               </div>
             ) : (
               /* ============================= */

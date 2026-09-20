@@ -191,7 +191,7 @@ export const me = async (req, res) => {
   try {
     const refreshToken = req.cookies.refreshToken;
     if (!refreshToken) {
-      return res.status(402).json({
+      return res.status(403).json({
         success: false,
         message: "Token not found, access denied!",
       });
@@ -217,7 +217,8 @@ export const me = async (req, res) => {
       .createHash("sha256")
       .update(refreshToken)
       .digest("hex");
-
+      
+    console.log("HASHED: ", refreshTokenHash);
     const session = await Session.findOne({
       userId: user._id,
       refreshTokenHash,
@@ -242,8 +243,6 @@ export const me = async (req, res) => {
       config.JWT_SECRET,
       { expiresIn: "10m" },
     );
-    session.refreshTokenHash = newRefreshTokenHash;
-    await session.save();
 
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
@@ -251,6 +250,9 @@ export const me = async (req, res) => {
       sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000 * 7,
     });
+
+    session.refreshTokenHash = newRefreshTokenHash;
+    await session.save();
 
     return res.status(200).json({
       success: true,

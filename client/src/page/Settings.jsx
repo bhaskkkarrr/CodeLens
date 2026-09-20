@@ -81,7 +81,7 @@ const Settings = () => {
 
   return (
     <div className="h-[calc(100vh-64px)] overflow-y-auto w-full bg-hunter-green-50 px-4 py-6 md:px-8 md:py-10 lg:px-12">
-      <div className="mx-auto w-full max-w-6xl">
+      <div className="mx-auto w-full ">
         {/* Page Header */}
         <div className="mb-8">
           <p className="mb-2 font-mono text-sm text-hunter-green-700">

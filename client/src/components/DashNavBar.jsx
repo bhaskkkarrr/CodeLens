@@ -9,39 +9,13 @@ import { RxCross2 } from "react-icons/rx";
 import { AnimatePresence, motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthContext";
-const pages = [
-  {
-    id: "dashboard",
-    name: "Dashboard",
-    url: "/dashboard/",
-    icon: <AiFillHome />,
-  },
-  {
-    id: "repositories",
-    name: "Repositories",
-    url: "/dashboard/repositories",
-    icon: <GoRepoForked />,
-  },
-  {
-    id: "setting",
-    name: "Setting",
-    url: "/dashboard/settings",
-    icon: <IoMdSettings />,
-  },
-];
+
 const DashNavBar = () => {
   const { user } = useAuth();
-  const [showSideBar, setShowSideBar] = useState(false);
   const navigate = useNavigate();
-  const currentPath = window.location.pathname;
-  const activeTab = pages.find((page) => {
-    return page.url === currentPath;
-  })?.id;
+
   return (
     <div className="w-full md:px-10 px-5 h-16 py-4 border-b border-norway-600/50 flex justify-between items-center ">
-      <div className="text-hunter-green-700 md:hidden block">
-        <GiHamburgerMenu size={25} onClick={() => setShowSideBar(true)} />
-      </div>
       <div className="md:text-3xl text-2xl font-semibold text-norway-800 md:hidden  ">
         CodeLens
       </div>
@@ -51,64 +25,6 @@ const DashNavBar = () => {
       <div className="text-hunter-green-100 rounded-2xl p-2 bg-hunter-green-700">
         <FaUser size={20} />
       </div>
-      <AnimatePresence>
-        {showSideBar && (
-          <motion.div
-            initial={{ x: -500 }}
-            animate={{ x: 0 }}
-            transition={{
-              duration: 0.8,
-              ease: "easeInOut",
-            }}
-            exit={{ x: -500 }}
-            className="fixed inset-0 z-999 w-full min-h-screen px-5 py-7 bg-hunter-green-100"
-          >
-            <div className="mb-10 flex items-center justify-between  gap-3">
-              <div className="flex items-center gap-3">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-hunter-green-300 p-1">
-                  <img
-                    src={logo}
-                    alt="CodeLens"
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-
-                <span className="text-2xl font-semibold tracking-tight text-norway-800">
-                  CodeLens
-                </span>
-              </div>
-              <motion.div
-                whileTap={{ rotate: 180 }}
-                className=" me-2"
-                onClick={() => setShowSideBar(false)}
-              >
-                <RxCross2 size={25} />
-              </motion.div>
-            </div>
-
-            <nav className="flex flex-col gap-5">
-              {pages.map((page) => (
-                <button
-                  key={page.id}
-                  className={`flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left font-mono text-lg text-norway-800 border border-hunter-green-400/80 transition bg-hunter-green-300/50 shadow-lg shadow-hunter-green-400/50 ${
-                    activeTab === page.id
-                      ? " bg-hunter-green-400/90 text-norway-50"
-                      : " hover:bg-hunter-green-300/50 text-norway-800"
-                  }`}
-                  onClick={() => {
-                    navigate(`${page.url}`);
-                    setShowSideBar(false);
-                  }}
-                >
-                  <span className="flex items-center text-lg">{page.icon}</span>
-
-                  <span>{page.name}</span>
-                </button>
-              ))}
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };
