@@ -9,7 +9,9 @@ createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <AuthProvider>
       <GithubProvider>
-        <App />
+        <RAGProvider>
+          <App />
+        </RAGProvider>
       </GithubProvider>
     </AuthProvider>
   </BrowserRouter>,

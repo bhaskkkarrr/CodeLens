@@ -4,18 +4,21 @@ import { createContext } from "react";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../services/axiosInstance";
 import { useAuth } from "./AuthContext";
-
 export const GithubContext = createContext();
 export const GithubProvider = ({ children }) => {
   const { token } = useAuth();
-  const [isGettingRepos, setIsGettingRepos] = useState(false);
+  const [isGettingRepos, setIsGettingRepos] = useState(true);
   const [isImportingRepository, setIsImportingRepository] = useState(false);
   const [selectedRepository, setSelectedRepository] = useState(null);
   const [repositories, setRepositories] = useState(null);
+
   const getAllRepositories = async () => {
     try {
-      setIsGettingRepos(true);
-      const res = await axiosInstance.get("/api/git/repositories");
+      const res = await axiosInstance.get("/api/git/repositories", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       console.log(res.data);
       setRepositories(res.data.repositories);
     } catch (error) {
@@ -32,26 +35,25 @@ export const GithubProvider = ({ children }) => {
     }
   };
   
-  useEffect(() => {
-    if (!token) {
-      return;
-    }
-
-    getAllRepositories();
-  }, [token]);
-
   const repositoryImport = async (id) => {
     console.log(id);
     try {
       setIsImportingRepository(true);
 
-      const res = await axiosInstance.post("/api/git/clone", {
-        repoId: id,
-      });
-
+      const res = await axiosInstance.post(
+        "/api/git/clone",
+        {
+          repoId: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
       if (res.data.success) {
         toast.success(res.data.message);
-        setSelectedRepository(res.data.repo);
+        setSelectedRepository(res.data.repoId);
       }
     } catch (error) {
       console.error("Repository import error:", error);

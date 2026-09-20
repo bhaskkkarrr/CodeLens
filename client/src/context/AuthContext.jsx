@@ -16,83 +16,17 @@ import toast from "react-hot-toast";
 
 export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
+
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [gettingMe, isGettingMe] = useState(true);
 
   function tokenAndUser(data) {
     setToken(data.token);
     setUser(data.user);
   }
-
-  useEffect(() => {
-    const requestInterceptor = axiosInstance.interceptors.request.use(
-      (config) => {
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-
-        return config;
-      },
-      (error) => Promise.reject(error),
-    );
-
-    return () => {
-      axiosInstance.interceptors.request.eject(requestInterceptor);
-    };
-  }, [token]);
-
-  useEffect(() => {
-    const responseInterceptor = axiosInstance.interceptors.response.use(
-      (response) => response,
-
-      async (error) => {
-        const originalRequest = error.config;
-
-        if (!error.response) {
-          return Promise.reject(error);
-        }
-
-        const isUnauthorized =
-          error.response.status === 403 &&
-          error.response?.data?.message === "Unauthorized";
-
-        const alreadyRetried = originalRequest?._retry;
-
-        const isAuthRequest = originalRequest?.url === "/api/auth/me";
-
-        if (isUnauthorized && !alreadyRetried && !isAuthRequest) {
-          originalRequest._retry = true;
-
-          try {
-            const res = await axiosInstance.get("/api/auth/me");
-
-            const newToken = res.data.token;
-            const newUser = res.data.user;
-
-            setToken(newToken);
-            setUser(newUser);
-
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-
-            return axiosInstance(originalRequest);
-          } catch (refreshError) {
-            setToken(null);
-            setUser(null);
-
-            return Promise.reject(refreshError);
-          }
-        }
-
-        return Promise.reject(error);
-      },
-    );
-
-    return () => {
-      axiosInstance.interceptors.response.eject(responseInterceptor);
-    };
-  }, []);
 
   const googleSubmit = async () => {
     try {
@@ -254,15 +188,15 @@ export const AuthProvider = ({ children }) => {
 
   const getAccessToken = async () => {
     try {
-      setIsAuthenticating(true);
       const res = await axiosInstance.get("/api/auth/me");
       tokenAndUser(res.data);
     } catch (error) {
       console.error(error);
     } finally {
-      setIsAuthenticating(false);
+      isGettingMe(false);
     }
   };
+
   useEffect(() => {
     getAccessToken();
   }, []);

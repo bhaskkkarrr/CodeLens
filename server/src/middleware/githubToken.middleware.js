@@ -39,7 +39,8 @@ export const githubToken = async (req, res, next) => {
         message: "Github not connected",
       });
     }
-    console.log("githubConnect", githubConnection);
+    
+    console.log("Connected Github:\n", githubConnection._id);
 
     const refreshToken = decryption(
       githubConnection.encryptedRefreshToken,
