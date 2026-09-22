@@ -7,11 +7,11 @@ import { useRAG } from "../context/RAGContext";
 
 const Conversation = () => {
   const navigate = useNavigate();
-  const { getConversation, selectedChat } = useRAG();
+  const { getConversation, selectedChat, ask_question } = useRAG();
   const { selectedRepository } = useGithub();
   const [question, setQuestion] = useState("");
   const { conversationId } = useParams();
-
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleGetConversation = async () => {
     await getConversation(conversationId);
   };
@@ -20,15 +20,15 @@ const Conversation = () => {
     handleGetConversation();
   }, [conversationId]);
 
-  const handleAsk = () => {
-    if (!question.trim()) return;
-
-    console.log({
-      repository: selectedRepository,
-      question,
-    });
-
-    setQuestion("");
+  const handleAsk = async () => {
+    try {
+      setIsSubmitting(true);
+      if (!question.trim()) return;
+      await ask_question(question);
+    } finally {
+      setIsSubmitting(false);
+      setQuestion("");
+    }
   };
 
   return (
@@ -96,7 +96,7 @@ const Conversation = () => {
               <button
                 type="button"
                 onClick={handleAsk}
-                disabled={!question.trim()}
+                disabled={isSubmitting}
                 aria-label="Send question"
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-hunter-green-800 text-white transition-all hover:bg-hunter-green-950 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
               >

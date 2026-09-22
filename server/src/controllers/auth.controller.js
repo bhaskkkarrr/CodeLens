@@ -221,12 +221,12 @@ export const me = async (req, res) => {
       .update(refreshToken)
       .digest("hex");
 
-    console.log("HASHED: ", refreshTokenHash);
     const session = await Session.findOne({
       userId: user._id,
       refreshTokenHash,
       revoked: false,
     });
+    console.log("Session:", session);
     if (!session) {
       return res.status(400).json({
         success: false,
@@ -247,15 +247,15 @@ export const me = async (req, res) => {
       { expiresIn: "10m" },
     );
 
+    session.refreshTokenHash = newRefreshTokenHash;
+    await session.save();
+    
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: "none",
       maxAge: 24 * 60 * 60 * 1000 * 7,
     });
-
-    session.refreshTokenHash = newRefreshTokenHash;
-    await session.save();
 
     return res.status(200).json({
       success: true,

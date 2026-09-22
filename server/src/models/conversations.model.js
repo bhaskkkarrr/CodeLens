@@ -1,17 +1,27 @@
 import mongoose from "mongoose";
-const messageSchema = new mongoose.Schema({
-  question: {
-    type: String,
-    required: [true, "Question is required"],
-    trim: true,
-  },
+const messageSchema = new mongoose.Schema(
+  {
+    question: {
+      type: String,
+      required: [true, "Question is required"],
+      trim: true,
+    },
 
-  answer: {
-    type: String,
-    required: [true, "Answer is required"],
-    trim: true,
+    answer: {
+      type: String,
+      required: [true, "Answer is required"],
+      trim: true,
+    },
+    sources: [
+      {
+        type: String,
+        trim: true,
+        default: null,
+      },
+    ],
   },
-});
+  { timestamps: true },
+);
 
 const conversationSchema = new mongoose.Schema(
   {

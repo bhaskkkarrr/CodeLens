@@ -15,6 +15,4 @@ class AI_Response_Structure(BaseModel):
         description="The answer to the user's question based on the retrieved repository context."
     )
 
-    source: list[str] = Field(
-        description="Exact repository file paths used to answer the question."
-    )
+    source: Optional[list[str]] = None

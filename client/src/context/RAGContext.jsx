@@ -57,7 +57,7 @@ export const RAGProvider = ({ children }) => {
   const ask_question = async (query) => {
     const response = await axiosInstance.post(
       "/api/rag/ask-question",
-      { query, repoId: selectedRepository },
+      { query, repoId: selectedChat.githubRepoId },
       { headers: { Authorization: `Bearer ${token}` } },
     );
     console.log("Answer: ", response.data);
@@ -72,6 +72,7 @@ export const RAGProvider = ({ children }) => {
         isGettingAllChats,
         getConversation,
         selectedChat,
+        ask_question,
       }}
     >
       {children}

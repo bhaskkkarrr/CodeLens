@@ -128,6 +128,13 @@ export const cloneRepository = async (req, res) => {
       );
       console.log("AI: \n", aiResponse.data);
 
+      if (!aiResponse.data.success) {
+        return res.status(400).json({
+          success: false,
+          message: "Repository cannot be cloned, try another repository",
+        });
+      }
+
       console.log("AFTER CLONE");
     } catch (error) {
       console.log("CLONE ERROR:", error.message);
@@ -168,6 +175,24 @@ export const cloneRepository = async (req, res) => {
       githubRepoId: newRepoClone.githubRepoId,
       messages: [],
     });
+
+    if (!newConversation) {
+      return res.status(400).json({
+        success: false,
+        message: "New conversation cannot be created",
+      });
+    }
+    const savingConversation = {
+      title: newConversation.title,
+      chatCode: newConversation.chatCode,
+      githubRepoId: newConversation.githubRepoId,
+      messages: newConversation.messages,
+    };
+
+    const oldChats = await redisClient.get(`rag:chats:${user._id}`);
+    const chats = oldChats ? JSON.parse(oldChats) : [];
+    chats.push(savingConversation);
+    await redisClient.set(`rag:chats:${user._id}`, JSON.stringify(chats));
 
     return res.status(200).json({
       success: true,

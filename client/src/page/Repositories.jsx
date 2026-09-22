@@ -23,6 +23,7 @@ import { GlobalLoader, RepoLoader } from "../components/Loaders";
 import { useGithub } from "../context/GitHubContext";
 
 import { config } from "../config/config";
+import { BiLoaderCircle } from "react-icons/bi";
 
 const Repositories = () => {
   const navigate = useNavigate();
@@ -109,7 +110,11 @@ const Repositories = () => {
 
   // Handle repository import
   const handleRepositoryImport = async (repo) => {
-    await repositoryImport(repo);
+    try {
+      await repositoryImport(repo);
+    } finally {
+      setSelectedRepositoryId(null);
+    }
   };
 
   console.log("Global Selected Repository: ", selectedRepository);
@@ -324,9 +329,9 @@ const Repositories = () => {
                               handleRepositoryImport(repo);
                             }
                           }}
-                          className={`flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-800 sm:w-auto disabled:cursor-progress ${
+                          className={`flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-medium text-norway-50 transition-colors sm:w-auto  ${
                             selectedRepositoryId === repo.id
-                              ? "bg-hunter-green-300"
+                              ? "bg-hunter-green-300 disabled:cursor-progress hover:bg-hunter-green-300"
                               : "bg-hunter-green-700"
                           }`}
                           disabled={isImportingRepository}
