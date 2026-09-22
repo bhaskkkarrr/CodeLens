@@ -86,8 +86,8 @@ export const ask_questions = async (req, res) => {
       if (chat) {
         chat.messages.push({
           question: query,
-          answer: response_data.response.response,
-          sources: response_data?.response?.source ,
+          answer: response_data.answer,
+          sources: response_data?.source ,
         });
       }
 
@@ -95,8 +95,8 @@ export const ask_questions = async (req, res) => {
 
       conversation.messages.push({
         question: query,
-        answer: response_data.response.response,
-        sources: response_data?.response?.source,
+        answer: response_data.answer,
+        sources: response_data?.source,
       });
 
       await conversation.save();

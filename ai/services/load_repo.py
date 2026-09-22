@@ -30,7 +30,7 @@ IGNORED_DIRECTORIES = {
 }
 
 
-async def load(repository_path,repo_id):
+async def load(repository_path,repo_id,user_id):
     print("PATH", repository_path)
     documents = []
 
@@ -58,13 +58,17 @@ async def load(repository_path,repo_id):
             print("file name:",file_path.name)
             documents.append(
                 Document(
-                    page_content=content,
+                    page_content=f"""
+                        FILE: {relative_path}
+                        {content}
+                        """,
                     metadata={
                         "file_path": str(relative_path),
                         "file_name": file_path.name,
                         "extension": file_path.suffix,
                         "repository_path": repository_path,
-                        "repository_id":repo_id
+                        "repository_id":repo_id,
+                        "user_id":user_id
                     }
                 )
             )
@@ -79,10 +83,11 @@ async def load(repository_path,repo_id):
     chunks = splitter.split_documents(documents)
     print(f"Chunks: {len(chunks)}")
     try:
-        vector_store = Chroma.from_documents(
+        vector_db_path = f"vector_db/{user_id}/{repo_id}"
+        Chroma.from_documents(
             documents=chunks,
             embedding=embedding_model,
-            persist_directory='./db'
+            persist_directory=vector_db_path
         )
         return {
             "success":True,

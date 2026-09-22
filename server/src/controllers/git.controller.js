@@ -1,4 +1,6 @@
 import axios from "axios";
+import fs from "fs/promises";
+import path from "path";
 import redisClient from "../config/redisClient.js";
 import simpleGit from "simple-git";
 import RepositoryModel from "../models/githubRepository.model.js";
@@ -114,30 +116,37 @@ export const cloneRepository = async (req, res) => {
     }
     const git = simpleGit();
 
-    const localPath = `../../cloned_repositories/${user._id.toString().slice(0, 7)}/${repository.data.name.toString() + Date.now()}`;
+    const localPath = path.join(
+      "../runtime_data",
+      "cloned_repositories",
+      user._id.toString(),
+      `${repository.data.name}-${Date.now()}`,
+    );
     try {
-      console.log("Entered ");
       console.log("PATH:", localPath);
+
+      // 1. Clone repository
       await git.clone(repoURL, localPath);
-      const aiResponse = await axios.post(
-        `${config.AI_API}/ai/repository/load`,
-        {
-          repositoryPath: localPath,
-          repo_id: repoId.toString(),
-        },
-      );
-      console.log("AI: \n", aiResponse.data);
+
+      console.log("Repository cloned successfully");
+
+      // 2. Send repository to FastAPI for indexing
+      aiResponse = await axios.post(`${config.AI_API}/ai/repository/load`, {
+        repositoryPath: localPath,
+        repo_id: repoId.toString(),
+        user_id: user._id.toString(),
+      });
+
+      console.log("AI:", aiResponse.data);
 
       if (!aiResponse.data.success) {
         return res.status(400).json({
           success: false,
-          message: "Repository cannot be cloned, try another repository",
+          message: "Repository cannot be processed",
         });
       }
-
-      console.log("AFTER CLONE");
     } catch (error) {
-      console.log("CLONE ERROR:", error.message);
+      console.log("REPOSITORY PROCESSING ERROR:", error.message);
 
       console.log(
         "PYTHON ERROR:",
@@ -146,9 +155,24 @@ export const cloneRepository = async (req, res) => {
 
       return res.status(400).json({
         success: false,
-        message: "Repository clone error",
+        message: "Repository processing error",
         error: error.message,
       });
+    } finally {
+      // ALWAYS delete temporary repository
+      try {
+        await fs.rm(localPath, {
+          recursive: true,
+          force: true,
+        });
+
+        console.log("Temporary repository deleted:", localPath);
+      } catch (deleteError) {
+        console.error(
+          "Error while deleting cloned repository:",
+          deleteError.message,
+        );
+      }
     }
 
     const newRepoClone = await RepositoryModel.create({

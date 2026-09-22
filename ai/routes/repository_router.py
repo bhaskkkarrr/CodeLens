@@ -6,6 +6,6 @@ repositoryRouter = APIRouter()
 @repositoryRouter.post('/load')
 async def load_repo(data:RepositoryVectorDBRequest):
   print("DATA:\n",data)
-  response = await load(data.repositoryPath, data.repo_id)
+  response = await load(data.repositoryPath, data.repo_id, data.user_id)
   return response
 

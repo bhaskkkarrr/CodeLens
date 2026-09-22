@@ -47,6 +47,7 @@ IMPORTANT RULES:
 
 10. The source field must contain only file paths that appear in the retrieved context.
 
+11. The answer you will give should be in detailed and fully explained do not give just one word or a one sentence answer one word answer is only allowed when there is nothing relevanty to tell the user otherwise it should be in detail 
 Return:
 
 response:
@@ -89,11 +90,9 @@ def retriever_response(query,repo_id):
       "message" :"No data found in Vector Database",
       "response" : None
     }
-  for i, doc in enumerate(docs):
-    print("\n========== DOCUMENT", i + 1, "==========")
+  for i, doc in enumerate(docs, 1):
+    print(f"\nDOCUMENT {i}")
     print("SOURCE:", doc.metadata.get("file_path"))
-    print("CONTENT:")
-    print(doc.page_content[:2000])
   
   context = "\n\n".join(
     [
@@ -109,8 +108,40 @@ def retriever_response(query,repo_id):
   })
   print("Retrieved documents:", len(docs))
   print("Context length:", len(context))
+  sources = []
 
-  llm_response = llm.invoke(final_prompt)
+  for doc in docs:
+     source = doc.metadata.get('file_path')
+
+     if source and source not in sources:
+        sources.append(source)
+
+  try:
+
+        llm_response = llm.invoke(final_prompt)
+
+        answer = llm_response.content
+
+        print("LLM ANSWER:")
+        print(answer)
+
+        return {
+            "success": True,
+            "message": "AI response generated successfully",
+            "answer": answer,
+            "source": sources
+        }
+
+  except Exception as error:
+
+        print("LLM ERROR:", repr(error))
+
+        return {
+            "success": False,
+            "message": "LLM failed to generate response",
+            "answer": None,
+            "source": sources
+        }
 #   llm_response = {
 #     "response": "The retrieved context shows that the authentication flow creates an access token and returns it to the client.",
     

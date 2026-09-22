@@ -14,7 +14,7 @@ vector_store = Chroma(
 )
 
 def get_retriever(repo_id):
-  print(id)
+  print("Repository ID:", repo_id)
   retriever = vector_store.as_retriever(
     search_type = 'similarity',
     search_kwargs = {

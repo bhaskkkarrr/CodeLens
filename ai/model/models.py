@@ -4,6 +4,7 @@ from typing import Optional
 class RepositoryVectorDBRequest(BaseModel):
   repositoryPath:str
   repo_id:str
+  user_id:str
 
 class RAGQuestionRequest(BaseModel):
   question:str  
