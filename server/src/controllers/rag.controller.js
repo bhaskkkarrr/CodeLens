@@ -5,7 +5,7 @@ import Conversation from "../models/conversations.model.js";
 import redisClient from "../config/redisClient.js";
 
 export const ask_questions = async (req, res) => {
-  const query = req.body.query;
+  const { chatCode, query, repoId } = req.body;
   console.log("Question", query);
   if (!query) {
     return res.status(400).json({
@@ -22,14 +22,14 @@ export const ask_questions = async (req, res) => {
     });
   }
 
-  const repoId = req.body.repoId;
   if (!repoId) {
     return res.status(400).json({
       success: false,
       message: "Repo id is required",
     });
   }
-  const cacheKey = `rag:${user._id}:${repoId}:${query.trim()}`;
+
+  const cacheKey = `rag:${user._id}:${chatCode}}`;
   const cacheValue = await redisClient.get(cacheKey);
   if (cacheValue) {
     const parsedCache = JSON.parse(cacheValue);
@@ -52,42 +52,46 @@ export const ask_questions = async (req, res) => {
         message: "You are not authorized to this repository",
       });
     }
+
     console.log("ConnectedRepos", connectedRepos);
 
-    const conversation = await Conversation.findOne({
+    let conversation = await Conversation.findOne({
       userId: user._id,
       githubRepoId: repoId,
     });
 
     if (!conversation) {
-      return res.status(400).json({
-        success: false,
-        message: "You are not authorized to this repository",
+      conversation = await Conversation.create({
+        userId: user._id,
+        repositoryId: repoId,
+        chatCode: crypto.randomUUID(),
+        title: repo.githubName,
+        githubRepoId: repo.githubRepoId,
+        messages: [],
       });
     }
 
     const ai_response = await axios.post(`${config.AI_API}/ai/rag/question`, {
       repo_id: repoId,
       question: query,
+      user_id: user._id,
     });
 
     const response_data = ai_response.data;
     console.log("RES:", response_data);
     if (response_data.success) {
-      const redisKey = `rag:chats:${user._id}`;
-
-      const cachedChats = await redisClient.get(redisKey);
-
+      const cachedChats = await redisClient.get(cacheKey);
       const chats = cachedChats ? JSON.parse(cachedChats) : [];
 
       const chat = chats.find(
         (chat) => chat.chatCode === conversation.chatCode,
       );
+
       if (chat) {
         chat.messages.push({
           question: query,
           answer: response_data.answer,
-          sources: response_data?.source ,
+          sources: response_data?.source,
         });
       }
 

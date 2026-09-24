@@ -10,8 +10,8 @@ load_dotenv()
 
 
 llm = ChatOpenRouter(
-  model="qwen/qwen-2.5-7b-instruct",
-  max_tokens=500,
+  model="openai/gpt-4o-mini",
+  max_tokens=700,
   temperature=0
 )
 
@@ -45,16 +45,19 @@ IMPORTANT RULES:
    route → controller → service → database
    only if those relationships are present in the retrieved context.
 
-10. The source field must contain only file paths that appear in the retrieved context.
 
 11. The answer you will give should be in detailed and fully explained do not give just one word or a one sentence answer one word answer is only allowed when there is nothing relevanty to tell the user otherwise it should be in detail 
+
+12. Do not use tables or any kind of decorated texts, only give me simple text.
+
+13. You can only use bullets or pointer and bold or  italics text decoraters.
+
+14. Generate a text that can be parsed in JSON format
 Return:
 
 response:
-A concise answer based strictly on the retrieved code.
+Return a clear and sufficiently detailed answer based strictly on the retrieved context.
 
-source:
-The exact file paths used to answer the question.
 
 Retrieved Repository Context:
 
@@ -72,10 +75,10 @@ main_prompt = ChatPromptTemplate.from_messages([
     """)
 ])
 
-def retriever_response(query,repo_id):
+def retriever_response(query,repo_id,user_id):
   print("Question",query)
 
-  retriever = get_retriever(repo_id)
+  retriever = get_retriever(repo_id,user_id)
 
   if len(query) == 0:
     return {
@@ -84,6 +87,7 @@ def retriever_response(query,repo_id):
     }
   
   docs = retriever.invoke(query)
+  
   if(len(docs) <= 0):
     return {
       "success":False,
@@ -106,8 +110,6 @@ def retriever_response(query,repo_id):
     'context' : context,
     'question' : query
   })
-  print("Retrieved documents:", len(docs))
-  print("Context length:", len(context))
   sources = []
 
   for doc in docs:
@@ -119,6 +121,15 @@ def retriever_response(query,repo_id):
   try:
 
         llm_response = llm.invoke(final_prompt)
+
+        print("========== RAW LLM RESPONSE ==========")
+        print(repr(llm_response))
+        print("======================================")
+
+        print("CONTENT:")
+        print(repr(llm_response.content))
+
+        answer = llm_response.content
 
         answer = llm_response.content
 

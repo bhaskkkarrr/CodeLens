@@ -282,20 +282,21 @@ const SideBar = () => {
                   </p>
 
                   <span className="rounded-full bg-hunter-green-200 px-2 py-0.5 text-[10px] font-semibold text-hunter-green-800">
-                    {allChats?.length}
+                    {allChats?.length || 0}
                   </span>
                 </div>
 
                 <div className="min-h-0 flex-1 overflow-y-auto pr-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-hunter-green-500">
                   <div className="flex flex-col gap-1">
-                    {allChats?.map((chat) => (
-                      <button
-                        key={chat.chatCode}
-                        type="button"
-                        onClick={() =>
-                          handleNavigation(`/dashboard/c/${chat.chatCode}`)
-                        }
-                        className="
+                    {allChats.length > 0 &&
+                      allChats?.map((chat) => (
+                        <button
+                          key={chat.chatCode}
+                          type="button"
+                          onClick={() =>
+                            handleNavigation(`/dashboard/c/${chat.chatCode}`)
+                          }
+                          className="
                         group flex w-full items-center gap-3
                         rounded-xl px-3 py-2.5
                         text-left text-sm
@@ -304,17 +305,17 @@ const SideBar = () => {
                         hover:bg-hunter-green-200/70
                         hover:text-norway-950
                       "
-                      >
-                        {/* Conversation indicator */}
-                        <span
-                          className={`h-1.5 w-1.5 shrink-0 rounded-full bg-hunter-green-500 transition-all group-hover:h-2 group-hover:w-2 group-hover:opacity-100 ${selectedChat?.githubRepoId === chat?.githubRepoId ? "opacity-100 w-2 h-2" : "opacity-50"}`}
-                        />
+                        >
+                          {/* Conversation indicator */}
+                          <span
+                            className={`h-1.5 w-1.5 shrink-0 rounded-full bg-hunter-green-500 transition-all group-hover:h-2 group-hover:w-2 group-hover:opacity-100 ${selectedChat?.githubRepoId === chat?.githubRepoId ? "opacity-100 w-2 h-2" : "opacity-50"}`}
+                          />
 
-                        <span className="truncate font-medium">
-                          {chat.title}
-                        </span>
-                      </button>
-                    ))}
+                          <span className="truncate font-medium">
+                            {chat.title}
+                          </span>
+                        </button>
+                      ))}
                   </div>
                 </div>
               </section>

@@ -18,12 +18,16 @@ export const getConversation = async (req, res) => {
       });
     }
 
+    const cacheKey = `chats:${user._id}`;
+    console.log("CacheKey", cacheKey);
+
     const conversation = await Conversation.findOne({
       userId: user._id,
       chatCode: chatId,
     }).select("-_id -__v -createdAt -updatedAt -repositoryId -userId");
 
     if (!conversation) {
+      await redisClient.del(cacheKey);
       return res.status(400).json({
         success: false,
         message: "Conversation not found",
@@ -53,7 +57,7 @@ export const allConversations = async (req, res) => {
         message: "User not found",
       });
     }
-    const cacheKey = `rag:chats:${user._id}`;
+    const cacheKey = `chats:${user._id}`;
     const cachedValue = await redisClient.get(cacheKey);
     if (cachedValue) {
       return res.status(200).json({
@@ -65,7 +69,7 @@ export const allConversations = async (req, res) => {
 
     const convo = await Conversation.find({
       userId: user._id,
-    }).select("title chatCode githubRepoId messages");
+    }).select("title chatCode githubRepoId");
 
     if (convo.length === 0) {
       return res.status(400).json({
@@ -73,6 +77,7 @@ export const allConversations = async (req, res) => {
         message: "no conversations started yet",
       });
     }
+
     await redisClient.set(cacheKey, JSON.stringify(convo));
 
     return res.status(200).json({

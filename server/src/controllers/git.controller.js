@@ -65,6 +65,12 @@ export const cloneRepository = async (req, res) => {
       });
     }
     const repoId = req.body.repoId;
+    if (!repoId) {
+      return res.status(400).json({
+        success: false,
+        message: "Repository ID is required",
+      });
+    }
 
     const repo = await RepositoryModel.findOne({
       userId: user._id,
@@ -72,16 +78,22 @@ export const cloneRepository = async (req, res) => {
     });
 
     if (repo) {
-      const conversation = await Conversation.findOne({
+      let conversation = await Conversation.findOne({
         userId: user._id,
         repositoryId: repo._id,
       });
+
       if (!conversation) {
-        return res.status(400).json({
-          success: false,
-          message: "No conversation found",
+        conversation = await Conversation.create({
+          userId: user._id,
+          repositoryId: repo._id,
+          chatCode: crypto.randomUUID(),
+          title: repo.githubName,
+          githubRepoId: repo.githubRepoId,
+          messages: [],
         });
       }
+
       return res.status(200).json({
         success: true,
         message: "Repository already cloned",
@@ -92,7 +104,7 @@ export const cloneRepository = async (req, res) => {
 
     const githubAccessToken = req.githubAccessToken;
     if (!githubAccessToken) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
         message: "Invalid access token",
       });
@@ -109,19 +121,21 @@ export const cloneRepository = async (req, res) => {
 
     const repoURL = repository.data.clone_url;
     if (!repoURL) {
-      return res.status(400).json({
+      return res.status(404).json({
         success: false,
         message: "Repository url not found",
       });
     }
     const git = simpleGit();
 
-    const localPath = path.join(
+    const localPath = path.resolve(
+      process.cwd(),
       "../runtime_data",
       "cloned_repositories",
       user._id.toString(),
       `${repository.data.name}-${Date.now()}`,
     );
+
     try {
       console.log("PATH:", localPath);
 
@@ -131,11 +145,14 @@ export const cloneRepository = async (req, res) => {
       console.log("Repository cloned successfully");
 
       // 2. Send repository to FastAPI for indexing
-      aiResponse = await axios.post(`${config.AI_API}/ai/repository/load`, {
-        repositoryPath: localPath,
-        repo_id: repoId.toString(),
-        user_id: user._id.toString(),
-      });
+      const aiResponse = await axios.post(
+        `${config.AI_API}/ai/repository/load`,
+        {
+          repositoryPath: localPath,
+          repo_id: repoId.toString(),
+          user_id: user._id.toString(),
+        },
+      );
 
       console.log("AI:", aiResponse.data);
 
@@ -153,7 +170,7 @@ export const cloneRepository = async (req, res) => {
         JSON.stringify(error.response?.data, null, 2),
       );
 
-      return res.status(400).json({
+      return res.status(502).json({
         success: false,
         message: "Repository processing error",
         error: error.message,
@@ -190,6 +207,7 @@ export const cloneRepository = async (req, res) => {
         message: "Repository clone error ",
       });
     }
+    
     const chatcode = crypto.randomUUID();
     const newConversation = await Conversation.create({
       userId: user._id,
@@ -206,6 +224,7 @@ export const cloneRepository = async (req, res) => {
         message: "New conversation cannot be created",
       });
     }
+
     const savingConversation = {
       title: newConversation.title,
       chatCode: newConversation.chatCode,
@@ -213,10 +232,12 @@ export const cloneRepository = async (req, res) => {
       messages: newConversation.messages,
     };
 
-    const oldChats = await redisClient.get(`rag:chats:${user._id}`);
+
+
+    const oldChats = await redisClient.get(`chats:${user._id}`);
     const chats = oldChats ? JSON.parse(oldChats) : [];
     chats.push(savingConversation);
-    await redisClient.set(`rag:chats:${user._id}`, JSON.stringify(chats));
+    await redisClient.set(`chats:${user._id}`, JSON.stringify(chats));
 
     return res.status(200).json({
       success: true,

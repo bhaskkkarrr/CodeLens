@@ -13,7 +13,9 @@ export const RAGProvider = ({ children }) => {
   const [allChats, setAllChats] = useState(null);
   const [isGettingAllChats, setIsGettingAllChats] = useState(true);
   const [selectedChat, setSelectedChat] = useState(null);
+  const [selectedChatMessages, setSelectedChatMessages] = useState(null);
   const navigate = useNavigate();
+
   const getAllChats = async () => {
     try {
       const res = await axiosInstance.get("/api/chat/chats", {
@@ -43,6 +45,7 @@ export const RAGProvider = ({ children }) => {
       });
       if (currentChat.data.success) {
         setSelectedChat(currentChat.data.conversation);
+        setSelectedChatMessages(currentChat.data.conversation.messages);
       }
     } catch (error) {
       toast.error(
@@ -57,7 +60,11 @@ export const RAGProvider = ({ children }) => {
   const ask_question = async (query) => {
     const response = await axiosInstance.post(
       "/api/rag/ask-question",
-      { query, repoId: selectedChat.githubRepoId },
+      {
+        query,
+        repoId: selectedChat.githubRepoId,
+        chatCode: selectedChat.chatCode,
+      },
       { headers: { Authorization: `Bearer ${token}` } },
     );
     console.log("Answer: ", response.data);
@@ -73,6 +80,8 @@ export const RAGProvider = ({ children }) => {
         getConversation,
         selectedChat,
         ask_question,
+        selectedChatMessages,
+        setSelectedChatMessages,
       }}
     >
       {children}

@@ -9,6 +9,7 @@ class RepositoryVectorDBRequest(BaseModel):
 class RAGQuestionRequest(BaseModel):
   question:str  
   repo_id:str
+  user_id:str
 
   
 class AI_Response_Structure(BaseModel):
