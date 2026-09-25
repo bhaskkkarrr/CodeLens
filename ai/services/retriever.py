@@ -120,21 +120,12 @@ def retriever_response(query,repo_id,user_id):
 
   try:
 
-        llm_response = llm.invoke(final_prompt)
+        llm_response = structured_llm.invoke(final_prompt)
 
-        print("========== RAW LLM RESPONSE ==========")
-        print(repr(llm_response))
-        print("======================================")
-
-        print("CONTENT:")
-        print(repr(llm_response.content))
-
-        answer = llm_response.content
-
-        answer = llm_response.content
-
+        # answer = llm_response.content
+        answer = llm_response.answer
         print("LLM ANSWER:")
-        print(answer)
+        print(llm_response)
 
         return {
             "success": True,

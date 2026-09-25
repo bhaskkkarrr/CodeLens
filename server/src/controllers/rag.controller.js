@@ -29,15 +29,29 @@ export const ask_questions = async (req, res) => {
     });
   }
 
-  const cacheKey = `rag:${user._id}:${chatCode}}`;
+  if (!chatCode) {
+    return res.status(400).json({
+      success: false,
+      message: "Chat code is required",
+    });
+  }
+
+  const cacheKey = `rag:${user._id}:${chatCode}`;
   const cacheValue = await redisClient.get(cacheKey);
   if (cacheValue) {
     const parsedCache = JSON.parse(cacheValue);
-    return res.status(200).json({
-      success: true,
-      message: "Response cached ",
-      response: parsedCache,
-    });
+    const messages = parsedCache?.messages;
+    if (messages) {
+      const message = messages.find((message) => message.question === query);
+      if (message) {
+        console.log("Answer cached");
+        return res.status(200).json({
+          success: true,
+          message: "Response cached",
+          answer: message.answer,
+        });
+      }
+    }
   }
 
   try {
@@ -55,19 +69,16 @@ export const ask_questions = async (req, res) => {
 
     console.log("ConnectedRepos", connectedRepos);
 
-    let conversation = await Conversation.findOne({
+    const conversation = await Conversation.findOne({
       userId: user._id,
       githubRepoId: repoId,
+      chatCode,
     });
 
     if (!conversation) {
-      conversation = await Conversation.create({
-        userId: user._id,
-        repositoryId: repoId,
-        chatCode: crypto.randomUUID(),
-        title: repo.githubName,
-        githubRepoId: repo.githubRepoId,
-        messages: [],
+      return res.status(400).json({
+        success: false,
+        message: "Conversation not found",
       });
     }
 
@@ -78,25 +89,9 @@ export const ask_questions = async (req, res) => {
     });
 
     const response_data = ai_response.data;
+
     console.log("RES:", response_data);
     if (response_data.success) {
-      const cachedChats = await redisClient.get(cacheKey);
-      const chats = cachedChats ? JSON.parse(cachedChats) : [];
-
-      const chat = chats.find(
-        (chat) => chat.chatCode === conversation.chatCode,
-      );
-
-      if (chat) {
-        chat.messages.push({
-          question: query,
-          answer: response_data.answer,
-          sources: response_data?.source,
-        });
-      }
-
-      await redisClient.set(redisKey, JSON.stringify(chats));
-
       conversation.messages.push({
         question: query,
         answer: response_data.answer,
@@ -104,11 +99,12 @@ export const ask_questions = async (req, res) => {
       });
 
       await conversation.save();
+      await redisClient.set(cacheKey, JSON.stringify(conversation));
 
       return res.status(200).json({
         success: true,
         message: "AI response generated successfully",
-        response: response_data.response,
+        answer: response_data.answer,
       });
     } else {
       return res.status(400).json({

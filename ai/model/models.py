@@ -13,8 +13,6 @@ class RAGQuestionRequest(BaseModel):
 
   
 class AI_Response_Structure(BaseModel):
-    response: str = Field(
+    answer: str = Field(
         description="The answer to the user's question based on the retrieved repository context."
     )
-
-    source: Optional[list[str]] = None

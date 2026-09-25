@@ -11,7 +11,7 @@ const ChatBox = ({ messages = [] }) => {
             {/* Question */}
             <div className="flex justify-end">
               <div className="max-w-[85%] sm:max-w-[75%]">
-                <div className="rounded-2xl rounded-br-md bg-hunter-green-600 px-4 py-3 text-sm text-white sm:text-lg">
+                <div className="rounded-2xl  rounded-br-md bg-hunter-green-600 px-4 py-3 text-sm text-white sm:text-lg">
                   {message.question}
                 </div>
               </div>
