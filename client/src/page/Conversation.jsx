@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { FaRobot, FaPaperPlane } from "react-icons/fa6";
 import { useNavigate, useParams } from "react-router";
@@ -6,6 +6,7 @@ import { useGithub } from "../context/GitHubContext";
 import { useRAG } from "../context/RAGContext";
 import ChatBox from "../components/ChatBox";
 import { BiLoaderAlt } from "react-icons/bi";
+import { CgLoadbar } from "react-icons/cg";
 
 const Conversation = () => {
   const navigate = useNavigate();
@@ -23,20 +24,26 @@ const Conversation = () => {
   const handleGetConversation = async () => {
     await getConversation(conversationId);
   };
+  const chatContainerRef = useRef(null);
+
+  useEffect(() => {
+    const container = chatContainerRef.current;
+
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, [selectedChatMessages]);
 
   useEffect(() => {
     handleGetConversation();
   }, [conversationId]);
-  const [askedQuestion, setAskedQuestion] = useState("");
 
   const handleAsk = async () => {
     try {
       setIsSubmitting(true);
       if (!question.trim()) return;
-      setAskedQuestion(question);
       await ask_question(question);
     } finally {
-      setAskedQuestion("");
       setIsSubmitting(false);
       setQuestion("");
     }
@@ -45,25 +52,60 @@ const Conversation = () => {
   return (
     <div className="flex h-[calc(100vh-64px)] w-full flex-col bg-norway-50">
       <main className="relative flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 overflow-y-auto">
+        <div
+          ref={chatContainerRef}
+          className="min-h-0 flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-hunter-green-500"
+        >
+          {selectedChatMessages?.length > 0 && (
+            <div className="group fixed right-2 top-60 z-20 hidden lg:flex">
+              <div className="flex w-12 flex-col gap-1 overflow-hidden rounded-2xl  transition-all duration-600 group-hover:w-70">
+                {/* Collapsed icon */}
+                <div className="group-hover:hidden">
+                  {selectedChatMessages.slice(0, 7).map((mess, idx) => {
+                    return (
+                      <div
+                        key={idx}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-hunter-green-500"
+                      >
+                        <CgLoadbar size={16} />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Questions */}
+                <div className=" max-h-70 flex-col gap-1 border border-hunter-green-300 bg-hunter-green-100 p-2 shadow-lg overflow-y-auto scrollbar-thin opacity-0 hidden transition-opacity duration-200 group-hover:opacity-100 group-hover:flex">
+                  {selectedChatMessages.map((message, index) => (
+                    <button
+                      key={message._id || index}
+                      onClick={() => {
+                        document.getElementById(message._id)?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }}
+                      className="w-full rounded-lg px-3 py-2 text-left text-sm text-hunter-green-950 transition-colors hover:bg-hunter-green-200"
+                    >
+                      <span className="block truncate">{message.question}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col px-1 py-2 sm:px-6 sm:py-10 lg:px-8">
             {selectedChatMessages?.length > 0 ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6 }}
-              >
-                <ChatBox messages={selectedChatMessages} />
-                {askedQuestion.length > 0 && (
-                  <div className="flex justify-end">
-                    <div className="max-w-[85%] sm:max-w-[75%]">
-                      <div className="rounded-2xl rounded-br-md bg-hunter-green-600 px-4 py-3 text-sm text-white sm:text-lg">
-                        {askedQuestion}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </motion.div>
+              <>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className=""
+                >
+                  <ChatBox messages={selectedChatMessages} />
+                </motion.div>
+              </>
             ) : (
               <div className="flex flex-1 flex-col items-center justify-center py-12 text-center">
                 {/* AI icon */}

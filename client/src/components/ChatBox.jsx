@@ -1,17 +1,15 @@
-import React from "react";
 import { marked } from "marked";
 
 const ChatBox = ({ messages = [] }) => {
   return (
     <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-4">
       <div className="space-y-6">
-        {messages.map((message) => (
-          <div key={message._id} className="space-y-2">
-
+        {messages.map((message, idx) => (
+          <div key={message._id || idx} id={message._id} className="space-y-2">
             {/* Question */}
             <div className="flex justify-end">
               <div className="max-w-[85%] sm:max-w-[75%]">
-                <div className="rounded-2xl  rounded-br-md bg-hunter-green-600 px-4 py-3 text-sm text-white sm:text-lg">
+                <div className="rounded-2xl rounded-br-md bg-hunter-green-600 px-4 py-3 text-sm text-white sm:text-lg">
                   {message.question}
                 </div>
               </div>
@@ -20,8 +18,7 @@ const ChatBox = ({ messages = [] }) => {
             {/* Answer */}
             <div className="flex justify-start">
               <div className="w-full max-w-[95%] sm:max-w-[90%]">
-                <div className=" px-4 py-4">
-
+                <div className="px-4 py-4">
                   <div
                     className="
                       sm:text-lg text-sm leading-7 text-gray-800
@@ -31,7 +28,6 @@ const ChatBox = ({ messages = [] }) => {
                       [&_code]:bg-hunter-green-100
                       [&_code]:px-1
                       [&_code]:py-0.5
-                      [&_code]:sm:text-lg
                       dark:[&_code]:bg-gray-800
                       [&_pre]:my-4
                       [&_pre]:overflow-x-auto
@@ -77,7 +73,7 @@ const ChatBox = ({ messages = [] }) => {
                             key={`${source}-${index}`}
                             title={source}
                             className="
-                              max-w-full truncate rounded-lg 
+                              max-w-full truncate rounded-lg
                               bg-hunter-green-100 px-2.5 py-1.5
                               text-sm text-gray-700
                             "
@@ -88,11 +84,9 @@ const ChatBox = ({ messages = [] }) => {
                       </div>
                     </div>
                   )}
-
                 </div>
               </div>
             </div>
-
           </div>
         ))}
       </div>
@@ -101,4 +95,3 @@ const ChatBox = ({ messages = [] }) => {
 };
 
 export default ChatBox;
-

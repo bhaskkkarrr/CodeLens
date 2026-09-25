@@ -49,6 +49,7 @@ export const ask_questions = async (req, res) => {
           success: true,
           message: "Response cached",
           answer: message.answer,
+          source: message.sources,
         });
       }
     }
@@ -105,6 +106,7 @@ export const ask_questions = async (req, res) => {
         success: true,
         message: "AI response generated successfully",
         answer: response_data.answer,
+        source: response_data.source,
       });
     } else {
       return res.status(400).json({

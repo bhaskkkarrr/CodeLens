@@ -18,8 +18,16 @@ export const getConversation = async (req, res) => {
       });
     }
 
-    const cacheKey = `chats:${user._id}`;
-    console.log("CacheKey", cacheKey);
+    const cacheKey = `rag:${user._id}:${chatId}`;
+    const cachedValue = await redisClient.get(cacheKey);
+    if (cachedValue) {
+      console.log("Chat returned from cache");
+      return res.status(200).json({
+        success: true,
+        message: "Conversation  found",
+        conversation: JSON.parse(cachedValue),
+      });
+    }
 
     const conversation = await Conversation.findOne({
       userId: user._id,

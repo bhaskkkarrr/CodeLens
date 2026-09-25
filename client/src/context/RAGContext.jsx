@@ -58,16 +58,46 @@ export const RAGProvider = ({ children }) => {
   };
 
   const ask_question = async (query) => {
-    const response = await axiosInstance.post(
-      "/api/rag/ask-question",
-      {
-        query,
-        repoId: selectedChat.githubRepoId,
-        chatCode: selectedChat.chatCode,
-      },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    console.log("Answer: ", response.data);
+    try {
+      const response = await axiosInstance.post(
+        "/api/rag/ask-question",
+        {
+          query,
+          repoId: selectedChat.githubRepoId,
+          chatCode: selectedChat.chatCode,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      console.log("Answer:", response.data);
+
+      if (!response.data.success) {
+        toast.error(response.data.message || "Failed to generate AI response");
+        return;
+      }
+
+      const newMessage = {
+        question: query,
+        answer: response.data.answer,
+        sources: response.data.source || [],
+        createdAt: new Date().toISOString(),
+      };
+
+      setSelectedChatMessages((prevMessages) => [
+        ...(prevMessages || []),
+        newMessage,
+      ]);
+    } catch (error) {
+      console.error("Ask question error:", error);
+
+      toast.error(error?.response?.data?.message || "Something went wrong");
+
+      throw error;
+    }
   };
 
   console.log("Chat", selectedChat);
