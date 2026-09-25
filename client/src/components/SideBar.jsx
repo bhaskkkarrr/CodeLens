@@ -39,7 +39,7 @@ const SideBar = () => {
   const location = useLocation();
   const { getAllChats, allChats, selectedChat } = useRAG();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const activePage = pages.find((page) => {
@@ -62,7 +62,9 @@ const SideBar = () => {
     getAllChats();
   }, []);
 
-  const handleLogout = async () => {};
+  const handleLogout = async () => {
+    await logout();
+  };
 
   return (
     <>

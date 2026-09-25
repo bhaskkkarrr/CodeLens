@@ -13,16 +13,17 @@ import {
 } from "../services/firebaseAuth";
 import { axiosInstance } from "../services/axiosInstance";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router";
 
 export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
-
+  const navigate = useNavigate();
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isDisconnecting, setIsDisconnecting] = useState(false);
   const [gettingMe, isGettingMe] = useState(true);
-
+  const [loggingOut, isLoggingOut] = useState(false);
   function tokenAndUser(data) {
     setToken(data.token);
     setUser(data.user);
@@ -207,9 +208,12 @@ export const AuthProvider = ({ children }) => {
   const githubDisconnect = async () => {
     try {
       setIsDisconnecting(true);
-      const res = await axiosInstance.get("/api/auth/disconnect-github");
+      const res = await axiosInstance.get("/api/auth/disconnect-github", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       if (res.data.success) {
         await getAccessToken();
+        setAllChats(null);
         toast.success("Github disconnected successfully ");
       }
     } catch (error) {
@@ -226,6 +230,60 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    try {
+      isLoggingOut(true);
+      const res = await axiosInstance.post(
+        "/api/auth/logout",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      if (res.data.success) {
+        setToken(null);
+        setUser(null);
+        navigate("/");
+        toast.success("Logged out successfully");
+      }
+    } catch (error) {
+      toast.error(
+        error.response?.data?.message ||
+          error.response?.message ||
+          "Something went wrong while logging out",
+      );
+    } finally {
+      isLoggingOut(false);
+    }
+  };
+
+  const deleteAccount = async () => {
+    try {
+      isLoggingOut(true);
+
+      const res = await axiosInstance.delete("/api/auth/delete-account", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.data.success) {
+        setToken(null);
+        setUser(null);
+
+        navigate("/");
+        toast.success("Account deleted successfully");
+      }
+    } catch (error) {
+      console.error("Delete account error:", error);
+
+      toast.error(
+        error.response?.data?.message ||
+          "Something went wrong while deleting account",
+      );
+    } finally {
+      isLoggingOut(false);
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -239,6 +297,8 @@ export const AuthProvider = ({ children }) => {
         verifyOTP,
         token,
         user,
+        logout,
+        deleteAccount,
       }}
     >
       {children}

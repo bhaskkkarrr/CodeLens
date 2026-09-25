@@ -106,6 +106,7 @@ export const RAGProvider = ({ children }) => {
       value={{
         getAllChats,
         allChats,
+        setAllChats,
         isGettingAllChats,
         getConversation,
         selectedChat,

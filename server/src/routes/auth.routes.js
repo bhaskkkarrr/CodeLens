@@ -15,6 +15,11 @@ authRouter.get("/me", authController.me);
 authRouter.post("/verify-otp", decodeFirebaseToken, authController.otpVerify);
 authRouter.get("/github-auth", authController.connectGithub);
 authRouter.post("/logout", isVerified, authController.logout);
-authRouter.get("/disconnect-github", isVerified, authController.disconnectGithub);
+authRouter.get(
+  "/disconnect-github",
+  isVerified,
+  authController.disconnectGithub,
+);
+authRouter.delete("/delete-account", isVerified, authController.deleteAccount);
 
 export default authRouter;

@@ -17,7 +17,7 @@ import DeleteConfirmationModal from "../components/DeleteConfirmationModal.jsx";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("account");
-  const { user, githubDisconnect, isDisconnecting } = useAuth();
+  const { user, githubDisconnect, isDisconnecting, deleteAccount } = useAuth();
   const navigate = useNavigate();
 
   const redirectUri = `${config.BACKEND_URL}/api/auth/github-auth`;
@@ -64,9 +64,8 @@ const Settings = () => {
   };
 
   const handleDeleteAccount = async () => {
-    toast.success("account deleted");
-    setShowDeleteModal(false);
     await deleteAccount();
+    setShowDeleteModal(false);
   };
 
   const settingsSections = [

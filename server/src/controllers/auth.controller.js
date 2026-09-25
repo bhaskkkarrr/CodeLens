@@ -1,19 +1,22 @@
 import User from "../models/user.model.js";
-import crypto from "crypto";
-import cloudinaryUpload from "../service/cloudinaryUpload.js";
-import { createSession } from "../utils/createSession.js";
-import jwt from "jsonwebtoken";
-import config from "../config/config.js";
 import Session from "../models/session.model.js";
-import { generateHtmlForOtp, generateOTP } from "../utils/generateOTP.js";
-import { sendMail } from "../service/email.service.js";
 import OTP from "../models/otp.model.js";
-import axios from "axios";
-import GithubConnection from "../models/githubConnection.model.js";
-import { symmetricEncryption } from "../utils/encryption.js";
-import redisClient from "../config/redisClient.js";
 import RepositoryModel from "../models/githubRepository.model.js";
 import Conversation from "../models/conversations.model.js";
+import GithubConnection from "../models/githubConnection.model.js";
+
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import axios from "axios";
+
+import config from "../config/config.js";
+
+import cloudinaryUpload from "../service/cloudinaryUpload.js";
+import { createSession } from "../utils/createSession.js";
+import { generateHtmlForOtp, generateOTP } from "../utils/generateOTP.js";
+import { sendMail } from "../service/email.service.js";
+import { symmetricEncryption } from "../utils/encryption.js";
+import redisClient from "../config/redisClient.js";
 
 export const register = async (req, res) => {
   console.log(req.firebaseUser);
@@ -249,7 +252,7 @@ export const me = async (req, res) => {
 
     session.refreshTokenHash = newRefreshTokenHash;
     await session.save();
-    
+
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: true,
@@ -461,17 +464,26 @@ export const disconnectGithub = async (req, res) => {
       userId: user._id,
     });
 
+    const conversations = await Conversation.find({ userId: user._id });
+    const ragKeys = conversations
+      .filter((conversation) => conversation.chatCode)
+      .map((conversation) => `rag:${user._id}:${conversation.chatCode}`);
+
+    if (ragKeys.length > 0) {
+      await redisClient.del(ragKeys);
+    }
     await Conversation.deleteMany({
       userId: user._id,
     });
 
-    await redisClient.del(`rag:chats:${user._id}`);
+    await redisClient.del(`chats:${user._id}`);
 
     githubConnect.revoked = true;
-
     await githubConnect.save();
+
     await redisClient.del(`github:repositories:${user._id}`);
     await redisClient.del(`github:access_token:${user._id}`);
+
     user.gitConnected = false;
     user.gitProfile = null;
     await user.save();
@@ -489,4 +501,106 @@ export const disconnectGithub = async (req, res) => {
   }
 };
 
-export const logout = async (req, res) => {};
+export const logout = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access denied",
+      });
+    }
+
+    const refreshTokenHash = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    const session = await Session.findOne({
+      userId: user._id,
+      refreshTokenHash,
+      revoked: false,
+    });
+
+    session.revoked = true;
+    await session.save();
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      sameSite: "none",
+      secure: true,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "User logged out successfully",
+    });
+  } catch (error) {
+    console.error("Delete account error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting account",
+    });
+  }
+};
+
+export const deleteAccount = async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+    const conversations = await Conversation.find({ userId: user._id });
+    const ragKeys = conversations
+      .filter((conversation) => conversation.chatCode)
+      .map((conversation) => `rag:${user._id}:${conversation.chatCode}`);
+
+    if (ragKeys.length > 0) {
+      await redisClient.del(ragKeys);
+    }
+
+    await GithubConnection.deleteMany({ userId: user._id });
+    await Conversation.deleteMany({ userId: user._id });
+    await OTP.deleteMany({ userId: user._id });
+    await RepositoryModel.deleteMany({ userId: user._id });
+    await Session.deleteMany({ userId: user._id });
+
+    user.isVerified = false;
+    user.gitConnected = false;
+    user.gitProfile = null;
+    user.isActive = false;
+
+    await user.save();
+
+    await redisClient.del(`chats:${user._id}`);
+    await redisClient.del(`github:repositories:${user._id}`);
+    await redisClient.del(`github:access_token:${user._id}`);
+
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Account deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete account error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error while deleting account",
+    });
+  }
+};
