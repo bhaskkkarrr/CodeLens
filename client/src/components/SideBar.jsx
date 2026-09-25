@@ -1,11 +1,6 @@
 import { useEffect, useState } from "react";
-
-import {
-  IoMdSettings,
-  IoMdChatboxes,
-  IoMdClose,
-  IoMdMenu,
-} from "react-icons/io";
+import { motion } from "motion/react";
+import { IoMdSettings, IoMdClose, IoMdMenu } from "react-icons/io";
 
 import { AiFillHome } from "react-icons/ai";
 import { GoRepoForked } from "react-icons/go";
@@ -16,6 +11,7 @@ import logo from "/icon-remove_bg.png";
 
 import { useLocation, useNavigate } from "react-router";
 import { useRAG } from "../context/RAGContext";
+import { useAuth } from "../context/AuthContext";
 
 const pages = [
   {
@@ -38,64 +34,13 @@ const pages = [
   },
 ];
 
-const conversations = [
-  {
-    id: "auth",
-    name: "Auth",
-    url: "/dashboard/conversation/c",
-  },
-  {
-    id: "codepilot",
-    name: "CodePilot",
-    url: "/dashboard/conversation/c",
-  },
-  {
-    id: "blinkit",
-    name: "Blinkit",
-    url: "/dashboard/conversation",
-  },
-  {
-    id: "apple",
-    name: "Apple",
-    url: "/dashboard/conversation",
-  },
-  {
-    id: "amazon",
-    name: "Amazon",
-    url: "/dashboard/conversation",
-  },
-  {
-    id: "authentication",
-    name: "Authentication",
-    url: "/dashboard/conversation",
-  },
-  {
-    id: "pooka",
-    name: "Pooka",
-    url: "/dashboard/conversation",
-  },
-  {
-    id: "interviewiq-1",
-    name: "InterviewIQ",
-    url: "/dashboard/conversation",
-  },
-  {
-    id: "interviewiq-2",
-    name: "InterviewIQ",
-    url: "/dashboard/conversation",
-  },
-  {
-    id: "interviewiq-3",
-    name: "InterviewIQ",
-    url: "/dashboard/conversation",
-  },
-];
-
 const SideBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { getAllChats, allChats, selectedChat } = useRAG();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { user } = useAuth();
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const activePage = pages.find((page) => {
     if (page.id === "dashboard") {
@@ -116,6 +61,8 @@ const SideBar = () => {
   useEffect(() => {
     getAllChats();
   }, []);
+
+  const handleLogout = async () => {};
 
   return (
     <>
@@ -323,14 +270,65 @@ const SideBar = () => {
           </div>
 
           <div className="mt-5 border-t border-norway-700/15 pt-4">
+            {isProfileOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="mb-2 overflow-hidden rounded-2xl border border-hunter-green-200 bg-white shadow-lg"
+              >
+                <div className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-hunter-green-700 text-hunter-green-100">
+                      <FaUser size={16} />
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-norway-900">
+                        {user?.username || "NA"}
+                      </p>
+
+                      <p className="truncate text-xs text-norway-600">
+                        {user?.email || "No email available"}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="my-3 border-t border-norway-700/10" />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsProfileOpen(false);
+                      navigate("/dashboard/settings");
+                    }}
+                    className="flex group w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-norway-700 transition-colors hover:bg-hunter-green-100 hover:text-norway-950"
+                  >
+                    <IoMdSettings
+                      size={17}
+                      className="transition-transform duration-300 group-hover:rotate-90"
+                    />
+                    <span>Account settings</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="group mt-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <IoMdClose
+                      size={17}
+                      className="transition-transform duration-300 group-hover:rotate-90"
+                    />
+                    <span>Log out</span>
+                  </button>
+                </div>
+              </motion.div>
+            )}
             <button
               type="button"
-              className="
-                group flex w-full items-center gap-3
-                rounded-2xl p-2
-                transition-all duration-200
-                hover:bg-hunter-green-200/60
-              "
+              onClick={() => setIsProfileOpen((prev) => !prev)}
+              className="group flex w-full items-center gap-3 rounded-2xl p-2 transition-all duration-200 hover:bg-hunter-green-200/60"
             >
               {/* Avatar */}
               <div
@@ -349,23 +347,15 @@ const SideBar = () => {
               {/* User information */}
               <div className="flex min-w-0 flex-1 flex-col items-start">
                 <span className="w-full text-left truncate text-sm font-semibold text-norway-900">
-                  Bhaskar
-                </span>
-
-                <span className="mt-0.5 flex items-center gap-1.5 text-[11px] text-norway-600">
-                  <span className="h-1.5 w-1.5 rounded-full bg-hunter-green-500" />
-                  Free Plan
+                  {user?.username || "NA"}
                 </span>
               </div>
 
               <FaChevronUp
                 size={12}
-                className="
-                  shrink-0
-                  text-norway-600
-                  transition-transform
-                  group-hover:-translate-y-0.5
-                "
+                className={`shrink-0 text-norway-600 transition-transform duration-200 ${
+                  isProfileOpen ? "rotate-180" : "group-hover:-translate-y-0.5"
+                }`}
               />
             </button>
           </div>

@@ -12,6 +12,8 @@ import {
 import { config } from "../config/config.js";
 import { useNavigate } from "react-router";
 import { BiLoader } from "react-icons/bi";
+import toast from "react-hot-toast";
+import DeleteConfirmationModal from "../components/DeleteConfirmationModal.jsx";
 
 const Settings = () => {
   const [activeSection, setActiveSection] = useState("account");
@@ -61,6 +63,12 @@ const Settings = () => {
     await githubDisconnect();
   };
 
+  const handleDeleteAccount = async () => {
+    toast.success("account deleted");
+    setShowDeleteModal(false);
+    await deleteAccount();
+  };
+
   const settingsSections = [
     {
       id: "account",
@@ -79,8 +87,10 @@ const Settings = () => {
     },
   ];
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   return (
-    <div className="h-[calc(100vh-64px)] overflow-y-auto w-full bg-hunter-green-50 px-4 py-6 md:px-8 md:py-10 lg:px-12">
+    <div className="h-[calc(100vh-64px)] overflow-y-auto scrollbar-thin scrollbar-thumb-hunter-green-400 w-full bg-hunter-green-50 px-4 py-6 md:px-8 md:py-10 lg:px-12">
       <div className="mx-auto w-full ">
         {/* Page Header */}
         <div className="mb-8">
@@ -101,7 +111,7 @@ const Settings = () => {
           {/* Sidebar */}
           <aside className="w-full lg:w-64 lg:shrink-0">
             {/* Mobile Navigation */}
-            <div className="flex gap-2 overflow-x-auto pb-2 lg:hidden">
+            <div className="flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-hunter-green-400 pb-2 lg:hidden">
               {settingsSections.map((section) => (
                 <button
                   key={section.id}
@@ -178,8 +188,9 @@ const Settings = () => {
 
                       <input
                         type="text"
-                        placeholder="Your username"
-                        className="w-full rounded-xl border border-hunter-green-300 bg-hunter-green-50 px-4 py-3 text-hunter-green-950 outline-none transition-colors placeholder:text-hunter-green-500 focus:border-hunter-green-600 focus:ring-2 focus:ring-hunter-green-200"
+                        disabled
+                        placeholder={user?.username}
+                        className="w-full rounded-xl border border-hunter-green-300 bg-hunter-green-50 px-4 py-3 text-hunter-green-950 outline-none transition-colors placeholder:text-hunter-green-500 placeholder:font-semibold focus:border-hunter-green-600 focus:ring-2 focus:ring-hunter-green-200"
                       />
                     </div>
 
@@ -190,15 +201,10 @@ const Settings = () => {
 
                       <input
                         type="email"
-                        placeholder="your@email.com"
-                        className="w-full rounded-xl border border-hunter-green-300 bg-hunter-green-50 px-4 py-3 text-hunter-green-950 outline-none transition-colors placeholder:text-hunter-green-500 focus:border-hunter-green-600 focus:ring-2 focus:ring-hunter-green-200"
+                        placeholder={user?.email}
+                        disabled
+                        className="w-full rounded-xl border border-hunter-green-300 bg-hunter-green-50 px-4 py-3 text-hunter-green-950 outline-none transition-colors placeholder:text-hunter-green-500 placeholder:font-semibold focus:border-hunter-green-600 focus:ring-2 focus:ring-hunter-green-200"
                       />
-                    </div>
-
-                    <div className="flex justify-end border-t border-hunter-green-300 pt-5">
-                      <button className="rounded-xl bg-hunter-green-700 px-5 py-2.5 text-sm font-medium text-norway-50 transition-colors hover:bg-hunter-green-800">
-                        Save changes
-                      </button>
                     </div>
                   </div>
                 </div>
@@ -226,7 +232,10 @@ const Settings = () => {
                       </p>
                     </div>
 
-                    <button className="flex items-center justify-center gap-2 rounded-xl border border-red-400 px-4 py-2.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-100">
+                    <button
+                      className="flex items-center justify-center gap-2 rounded-xl border border-red-400 px-4 py-2.5 text-sm font-medium text-red-700 transition-colors hover:bg-red-100"
+                      onClick={() => setShowDeleteModal(true)}
+                    >
                       <FaTrash />
                       Delete account
                     </button>
@@ -296,7 +305,7 @@ const Settings = () => {
                       >
                         {isDisconnecting ? (
                           <div className="animate-spin">
-                            <BiLoader size={15}/>
+                            <BiLoader size={15} />
                           </div>
                         ) : (
                           "Disconnect GitHub"
@@ -409,6 +418,13 @@ const Settings = () => {
           </main>
         </div>
       </div>
+      {showDeleteModal && (
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+        />
+      )}
     </div>
   );
 };
