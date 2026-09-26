@@ -41,6 +41,7 @@ export const getConversation = async (req, res) => {
         message: "Conversation not found",
       });
     }
+    await redisClient.set(cacheKey, JSON.stringify(conversation));
 
     return res.status(200).json({
       success: true,
