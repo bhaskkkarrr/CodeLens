@@ -1,17 +1,9 @@
 from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from utils.ai_resources import get_embedding_model
 
 from dotenv import load_dotenv
 load_dotenv()
 
-embedding_model = HuggingFaceEmbeddings(
-  model_name = "BAAI/bge-small-en-v1.5"
-)
-
-vector_store = Chroma(
-  persist_directory='vector_db',
-  embedding_function=embedding_model
-)
 from pathlib import Path
 
 VECTOR_DB_ROOT = Path("vector_db")
@@ -25,6 +17,8 @@ def get_vector_store(repo_id, user_id):
     )
 
     print("CHROMA PATH:", db_path)
+
+    embedding_model = get_embedding_model()
 
     vector_store = Chroma(
         persist_directory=str(db_path),

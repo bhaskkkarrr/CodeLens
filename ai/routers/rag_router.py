@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from model.models import RAGQuestionRequest
-from services.controllers import ask_question
+from models.models import RAGQuestionRequest
+from controllers.ask_question import ask_question
 ragRouter = APIRouter()
 
 @ragRouter.post('/question')

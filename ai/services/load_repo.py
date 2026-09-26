@@ -2,12 +2,8 @@ from pathlib import Path
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rich import print
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_chroma import Chroma
-
-embedding_model = HuggingFaceEmbeddings(
-    model_name = "BAAI/bge-small-en-v1.5"
-)
+from utils.ai_resources import get_embedding_model
 
 SUPPORTED_EXTENSIONS = {
     ".js",
@@ -81,7 +77,10 @@ async def load(repository_path,repo_id,user_id):
     
     splitter = RecursiveCharacterTextSplitter(chunk_size = 2000, chunk_overlap = 200 )
     chunks = splitter.split_documents(documents)
+    
     print(f"Chunks: {len(chunks)}")
+
+    embedding_model = get_embedding_model()
     try:
         vector_db_path = f"vector_db/{user_id}/{repo_id}"
         Chroma.from_documents(

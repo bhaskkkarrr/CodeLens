@@ -1,21 +1,11 @@
-from langchain_chroma import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_mistralai import ChatMistralAI
-from langchain_openrouter import ChatOpenRouter
-from services.get_retriever import get_retriever
-from model.models import AI_Response_Structure
+from utils.get_retriever import get_retriever
+from models.models import AI_Response_Structure
+from utils.ai_resources import get_llm
+
 from dotenv import load_dotenv
 load_dotenv()
 
-
-llm = ChatOpenRouter(
-  model="openai/gpt-4o-mini",
-  max_tokens=700,
-  temperature=0
-)
-
-structured_llm = llm.with_structured_output(AI_Response_Structure)
 
 rag_system_prompt = """
 You are CodeLens, a repository code analysis assistant.
@@ -75,10 +65,12 @@ main_prompt = ChatPromptTemplate.from_messages([
     """)
 ])
 
-def retriever_response(query,repo_id,user_id):
+def get_answer(query,repo_id,user_id):
   print("Question",query)
 
   retriever = get_retriever(repo_id,user_id)
+  llm = get_llm()
+  structured_llm = llm.with_structured_output(AI_Response_Structure)
 
   if len(query) == 0:
     return {
@@ -94,22 +86,24 @@ def retriever_response(query,repo_id,user_id):
       "message" :"No data found in Vector Database",
       "response" : None
     }
+  
   for i, doc in enumerate(docs, 1):
     print(f"\nDOCUMENT {i}")
     print("SOURCE:", doc.metadata.get("file_path"))
   
   context = "\n\n".join(
-    [
-        f"FILE: {doc.metadata.get('file_path', 'Unknown')}\n"
-        f"{doc.page_content}"
-        for doc in docs
-    ]
-)
+        [
+            f"FILE: {doc.metadata.get('file_path', 'Unknown')}\n"
+            f"{doc.page_content}"
+            for doc in docs
+        ]
+    )
 
   final_prompt = main_prompt.invoke({
     'context' : context,
     'question' : query
   })
+
   sources = []
 
   for doc in docs:
@@ -122,7 +116,6 @@ def retriever_response(query,repo_id,user_id):
 
         llm_response = structured_llm.invoke(final_prompt)
 
-        # answer = llm_response.content
         answer = llm_response.answer
         print("LLM ANSWER:")
         print(llm_response)
@@ -144,15 +137,3 @@ def retriever_response(query,repo_id,user_id):
             "answer": None,
             "source": sources
         }
-#   llm_response = {
-#     "response": "The retrieved context shows that the authentication flow creates an access token and returns it to the client.",
-    
-# }
-
-  # llm_response = {"response":"Success"}
-  print("LLM", llm_response)
-  return {
-    "success":True,
-    "message":"AI response generated successfully",
-    "response":llm_response
-  }

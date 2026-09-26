@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from routes.repository_router import repositoryRouter
-from routes.rag_routes import ragRouter
+from routers.repository_router import repositoryRouter
+from routers.rag_router import ragRouter
 app = FastAPI()
 
 app.include_router(

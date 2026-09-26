@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from model.models import RepositoryVectorDBRequest
+from models.models import RepositoryVectorDBRequest
 from services.load_repo import load
 repositoryRouter = APIRouter()
 
