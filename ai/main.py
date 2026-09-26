@@ -16,3 +16,7 @@ app.include_router(
 @app.get("/")
 async def root():
     return {"status": "AI service running"}
+
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
