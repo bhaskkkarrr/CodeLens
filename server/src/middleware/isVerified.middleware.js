@@ -3,6 +3,14 @@ import config from "../config/config.js";
 import User from "../models/user.model.js";
 export const isVerified = async (req, res, next) => {
   try {
+    const refreshToken = req.cookies.refreshToken;
+    console.log("refresh", refreshToken);
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
     let authHeader = req.headers.authorization || req.headers.Authorization;
     if (!authHeader) {
       return res.status(401).json({
