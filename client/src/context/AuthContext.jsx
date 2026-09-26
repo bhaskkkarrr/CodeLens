@@ -213,7 +213,6 @@ export const AuthProvider = ({ children }) => {
       });
       if (res.data.success) {
         await getAccessToken();
-        setAllChats(null);
         toast.success("Github disconnected successfully ");
       }
     } catch (error) {
