@@ -1,7 +1,13 @@
 from langchain_core.prompts import ChatPromptTemplate
+print("langchain_core")
 from utils.get_retriever import get_retriever
+print("get_retriever")
+
 from models.models import AI_Response_Structure
+print("model")
+
 from utils.ai_resources import get_llm
+print("utils")
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -66,6 +72,8 @@ main_prompt = ChatPromptTemplate.from_messages([
 ])
 
 def get_answer(query,repo_id,user_id):
+  print("enetered get_answer")
+
   print("Question",query)
 
   retriever = get_retriever(repo_id,user_id)

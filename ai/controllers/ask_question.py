@@ -1,5 +1,5 @@
 from services.get_answer import get_answer
-
+print("getted get_answer")
 async def ask_question(query,repo_id,user_id):
   try:
     response = get_answer(query,repo_id,user_id)
