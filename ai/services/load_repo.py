@@ -1,17 +1,32 @@
+print("LOAD_REPO: START", flush=True)
+
 from pathlib import Path
+
+print("LOAD_REPO: PATHLIB IMPORTED", flush=True)
+
 from langchain_core.documents import Document
+
+print("LOAD_REPO: DOCUMENT IMPORTED", flush=True)
+
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+
+print("LOAD_REPO: TEXT SPLITTER IMPORTED", flush=True)
+
 from rich import print
+
+print("LOAD_REPO: RICH IMPORTED", flush=True)
+
 from langchain_chroma import Chroma
+
+print("LOAD_REPO: CHROMA IMPORTED", flush=True)
+
 from utils.ai_resources import get_embedding_model
 
+print("LOAD_REPO: AI RESOURCES IMPORTED", flush=True)
+
+
 SUPPORTED_EXTENSIONS = {
-    ".js",
-    ".jsx",
-    ".ts",
-    ".tsx",
-    ".html",
-    ".md"
+    ".js", ".jsx", ".ts", ".tsx", ".html", ".md"
 }
 
 IGNORED_DIRECTORIES = {
@@ -26,74 +41,10 @@ IGNORED_DIRECTORIES = {
 }
 
 
-async def load(repository_path,repo_id,user_id):
-    print("PATH", repository_path)
-    documents = []
+async def load(repository_path, repo_id, user_id):
+    print("LOAD FUNCTION CALLED", flush=True)
 
+    documents = []
     root = Path(repository_path)
 
-    for file_path in root.rglob("*"):
-
-        if not file_path.is_file():
-            continue
-
-        if any(
-            ignored in file_path.parts for ignored in IGNORED_DIRECTORIES
-        ):
-            continue
-
-        if file_path.suffix not in SUPPORTED_EXTENSIONS:
-            continue
-
-        try:
-            content = file_path.read_text(
-                encoding="utf-8"
-            )
-
-            relative_path = file_path.relative_to(root)
-            print("file name:",file_path.name)
-            documents.append(
-                Document(
-                    page_content=f"""
-                        FILE: {relative_path}
-                        {content}
-                        """,
-                    metadata={
-                        "file_path": str(relative_path),
-                        "file_name": file_path.name,
-                        "extension": file_path.suffix,
-                        "repository_path": repository_path,
-                        "repository_id":repo_id,
-                        "user_id":user_id
-                    }
-                )
-            )
-
-        except UnicodeDecodeError:
-            continue
-
-
-    print(f"Loaded {len(documents)} files")
-    
-    splitter = RecursiveCharacterTextSplitter(chunk_size = 2000, chunk_overlap = 200 )
-    chunks = splitter.split_documents(documents)
-    
-    print(f"Chunks: {len(chunks)}")
-
-    embedding_model = get_embedding_model()
-    try:
-        vector_db_path = f"vector_db/{user_id}/{repo_id}"
-        Chroma.from_documents(
-            documents=chunks,
-            embedding=embedding_model,
-            persist_directory=vector_db_path
-        )
-        return {
-            "success":True,
-            "message":"Repository cloned successfully"
-        }
-    except:
-        return {
-            "success":False,
-            "message":"Repository cloning unsuccessful"
-        }    
+    # Your existing load logic here
