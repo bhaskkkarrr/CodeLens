@@ -1,11 +1,12 @@
 from langchain_chroma import Chroma
 from utils.ai_resources import get_embedding_model
+from pathlib import Path
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from pathlib import Path
 
+embedding_model = get_embedding_model()
 VECTOR_DB_ROOT = Path("vector_db")
 
 def get_vector_store(repo_id, user_id):
@@ -18,7 +19,6 @@ def get_vector_store(repo_id, user_id):
 
     print("CHROMA PATH:", db_path)
 
-    embedding_model = get_embedding_model()
 
     vector_store = Chroma(
         persist_directory=str(db_path),

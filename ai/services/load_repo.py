@@ -5,6 +5,9 @@ from rich import print
 from langchain_chroma import Chroma
 from utils.ai_resources import get_embedding_model
 
+
+embedding_model = get_embedding_model()
+
 SUPPORTED_EXTENSIONS = {
     ".js",
     ".jsx",
@@ -80,7 +83,6 @@ async def load(repository_path,repo_id,user_id):
     
     print(f"Chunks: {len(chunks)}")
 
-    embedding_model = get_embedding_model()
     try:
         vector_db_path = f"vector_db/{user_id}/{repo_id}"
         Chroma.from_documents(
