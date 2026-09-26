@@ -1,6 +1,3 @@
-from langchain_huggingface import HuggingFaceEmbeddings
-from langchain_openrouter import ChatOpenRouter
-
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -12,6 +9,8 @@ def get_embedding_model():
     global _embedding_model
 
     if _embedding_model is None:
+        from langchain_huggingface import HuggingFaceEmbeddings
+
         print("Loading embedding model...")
 
         _embedding_model = HuggingFaceEmbeddings(
@@ -28,6 +27,8 @@ def get_llm():
 
     if _llm is None:
         print("Initializing LLM...")
+
+        from langchain_openrouter import ChatOpenRouter
 
         _llm = ChatOpenRouter(
                 model="openai/gpt-4o-mini",
