@@ -64,15 +64,14 @@ main_prompt = ChatPromptTemplate.from_messages([
     """)
 ])
 
-llm = get_llm()
-structured_llm = llm.with_structured_output(AI_Response_Structure)
-
 def get_answer(query,repo_id,user_id):
   print("enetered get_answer")
 
   print("Question",query)
 
   retriever = get_retriever(repo_id,user_id)
+  llm = get_llm()
+  structured_llm = llm.with_structured_output(AI_Response_Structure)
 
   if len(query) == 0:
     return {
