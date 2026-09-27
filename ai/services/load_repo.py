@@ -74,7 +74,12 @@ async def load(repository_path,repo_id,user_id):
 
 
     print(f"Loaded {len(documents)} files")
-    
+    if not documents:
+        return {
+            "success": False,
+            "message": "No supported files found in repository"
+        }
+
     splitter = RecursiveCharacterTextSplitter(chunk_size = 2000, chunk_overlap = 200 )
     chunks = splitter.split_documents(documents)
     
