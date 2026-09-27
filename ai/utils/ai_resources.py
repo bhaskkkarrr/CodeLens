@@ -1,24 +1,20 @@
-from pathlib import Path
 from dotenv import load_dotenv
-
 load_dotenv()
 
 _embedding_model = None
 _llm = None
-
-MODEL_PATH = Path("/app/models/bge-small-en-v1.5")
 
 
 def get_embedding_model():
     global _embedding_model
 
     if _embedding_model is None:
-        print("Loading embedding model from:", MODEL_PATH)
+        print("Loading embedding model...")
 
-        from langchain_huggingface import HuggingFaceEmbeddings
+        from langchain_huggingface import HuggingFaceEndpointEmbeddings
 
-        _embedding_model = HuggingFaceEmbeddings(
-            model_name=str(MODEL_PATH)
+        _embedding_model = HuggingFaceEndpointEmbeddings(
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
 
         print("Embedding model loaded.")

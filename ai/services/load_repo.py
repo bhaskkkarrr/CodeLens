@@ -40,7 +40,13 @@ async def load(repo_url,repo_id,user_id):
     )
 
     if repo_path.exists():
-        shutil.rmtree(repo_path)
+
+            print("Removing old repository...")
+
+            shutil.rmtree(
+                repo_path,
+                ignore_errors=True
+            )
 
     repo_path.parent.mkdir(parents=True, exist_ok=True)
 

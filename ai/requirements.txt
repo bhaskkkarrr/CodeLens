@@ -10,6 +10,3 @@ langchain-chroma
 
 langchain-openrouter
 langchain-huggingface
-
-sentence-transformers
-huggingface-hub
