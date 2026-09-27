@@ -1,4 +1,6 @@
 from pathlib import Path
+import subprocess
+import shutil
 from langchain_core.documents import Document
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from rich import print
@@ -26,11 +28,32 @@ IGNORED_DIRECTORIES = {
 }
 
 
-async def load(repository_path,repo_id,user_id):
-    print("PATH", repository_path)
+async def load(repo_url,repo_id,user_id):
+    print("Repo URL", repo_url)
+    print("Cloning started")
+
+    repo_path = (
+        Path("runtime_data")
+        / "cloned_repositories"
+        / str(user_id)
+        / str(repo_id)
+    )
+
+    if repo_path.exists():
+        shutil.rmtree(repo_path)
+
+    repo_path.parent.mkdir(parents=True, exist_ok=True)
+
+    subprocess.run(
+        ["git", "clone", repo_url, str(repo_path)],
+        check=True
+    )
+
+    print("Repository cloned to:", repo_path)
+
     documents = []
 
-    root = Path(repository_path)
+    root = repo_path
 
     for file_path in root.rglob("*"):
 
@@ -62,7 +85,6 @@ async def load(repository_path,repo_id,user_id):
                         "file_path": str(relative_path),
                         "file_name": file_path.name,
                         "extension": file_path.suffix,
-                        "repository_path": repository_path,
                         "repository_id":repo_id,
                         "user_id":user_id
                     }

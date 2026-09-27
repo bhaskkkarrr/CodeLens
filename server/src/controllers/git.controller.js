@@ -126,29 +126,13 @@ export const cloneRepository = async (req, res) => {
         message: "Repository url not found",
       });
     }
-    const git = simpleGit();
-
-    const localPath = path.resolve(
-      process.cwd(),
-      "../runtime_data",
-      "cloned_repositories",
-      user._id.toString(),
-      `${repository.data.name}-${Date.now()}`,
-    );
 
     try {
-      console.log("PATH:", localPath);
 
-      // 1. Clone repository
-      await git.clone(repoURL, localPath);
-
-      console.log("Repository cloned successfully");
-
-      // 2. Send repository to FastAPI for indexing
       const aiResponse = await axios.post(
         `${config.AI_API}/ai/repository/load`,
         {
-          repositoryPath: localPath,
+          repo_url: repoURL,
           repo_id: repoId.toString(),
           user_id: user._id.toString(),
         },
@@ -175,22 +159,7 @@ export const cloneRepository = async (req, res) => {
         message: "Repository processing error",
         error: error.message,
       });
-    } finally {
-      // ALWAYS delete temporary repository
-      try {
-        await fs.rm(localPath, {
-          recursive: true,
-          force: true,
-        });
-
-        console.log("Temporary repository deleted:", localPath);
-      } catch (deleteError) {
-        console.error(
-          "Error while deleting cloned repository:",
-          deleteError.message,
-        );
-      }
-    }
+    } 
 
     const newRepoClone = await RepositoryModel.create({
       userId: user._id,

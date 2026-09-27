@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class RepositoryVectorDBRequest(BaseModel):
-  repositoryPath:str
+  repo_url:str
   repo_id:str
   user_id:str
 

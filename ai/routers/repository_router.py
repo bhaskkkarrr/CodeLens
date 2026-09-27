@@ -8,7 +8,7 @@ repositoryRouter = APIRouter()
 async def load_repo(data: RepositoryVectorDBRequest):
     print("DATA:", data)
     response = await load(
-        data.repositoryPath,
+        data.repo_url,
         data.repo_id,
         data.user_id
     )
