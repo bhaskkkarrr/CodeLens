@@ -1,20 +1,24 @@
+from pathlib import Path
 from dotenv import load_dotenv
+
 load_dotenv()
 
 _embedding_model = None
 _llm = None
+
+MODEL_PATH = Path("/app/models/bge-small-en-v1.5")
 
 
 def get_embedding_model():
     global _embedding_model
 
     if _embedding_model is None:
+        print("Loading embedding model from:", MODEL_PATH)
+
         from langchain_huggingface import HuggingFaceEmbeddings
 
-        print("Loading embedding model...")
-
         _embedding_model = HuggingFaceEmbeddings(
-            model_name="BAAI/bge-small-en-v1.5"
+            model_name=str(MODEL_PATH)
         )
 
         print("Embedding model loaded.")
@@ -31,10 +35,10 @@ def get_llm():
         from langchain_openrouter import ChatOpenRouter
 
         _llm = ChatOpenRouter(
-                model="openai/gpt-4o-mini",
-                max_tokens=700,
-                temperature=0
-              )
+            model="openai/gpt-4o-mini",
+            max_tokens=700,
+            temperature=0
+        )
 
         print("LLM initialized.")
 
