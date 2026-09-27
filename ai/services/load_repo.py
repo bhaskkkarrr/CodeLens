@@ -125,8 +125,10 @@ async def load(repo_url,repo_id,user_id):
             "success":True,
             "message":"Repository cloned successfully"
         }
-    except:
+    except Exception as e:
+        print("VECTOR DB ERROR:", repr(e))
+
         return {
-            "success":False,
-            "message":"Repository cloning unsuccessful"
-        }    
+            "success": False,
+            "message": str(e)
+        }  

@@ -4,7 +4,6 @@ load_dotenv()
 _embedding_model = None
 _llm = None
 
-
 def get_embedding_model():
     global _embedding_model
 
@@ -14,13 +13,12 @@ def get_embedding_model():
         from langchain_huggingface import HuggingFaceEndpointEmbeddings
 
         _embedding_model = HuggingFaceEndpointEmbeddings(
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+            model="sentence-transformers/all-MiniLM-L6-v2"
         )
 
         print("Embedding model loaded.")
 
     return _embedding_model
-
 
 def get_llm():
     global _llm
