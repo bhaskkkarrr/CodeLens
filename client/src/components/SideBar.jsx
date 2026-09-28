@@ -15,21 +15,15 @@ import { useAuth } from "../context/AuthContext";
 
 const pages = [
   {
-    id: "dashboard",
-    name: "Dashboard",
-    url: "/dashboard/",
-    icon: <AiFillHome />,
-  },
-  {
     id: "repositories",
     name: "Repositories",
-    url: "/dashboard/repositories",
+    url: "/repositories",
     icon: <GoRepoForked />,
   },
   {
     id: "setting",
     name: "Settings",
-    url: "/dashboard/settings",
+    url: "/settings",
     icon: <IoMdSettings />,
   },
 ];
@@ -43,10 +37,10 @@ const SideBar = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const activePage = pages.find((page) => {
-    if (page.id === "dashboard") {
+    if (page.id === "repositories") {
       return (
-        location.pathname === "/dashboard/" ||
-        location.pathname === "/dashboard"
+        location.pathname === "/repositories/" ||
+        location.pathname === "/repositories"
       );
     }
 
@@ -71,7 +65,7 @@ const SideBar = () => {
       <div className="fixed left-0 right-0 top-0 z-40 flex h-16 items-center justify-between border-b border-norway-700/20 bg-norway-50/95 px-4 shadow-sm backdrop-blur-md lg:hidden">
         {/* Logo */}
         <button
-          onClick={() => handleNavigation("/dashboard/")}
+          onClick={() => handleNavigation("/repositories")}
           className="flex items-center gap-2.5"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-hunter-green-300 p-1">
@@ -127,7 +121,7 @@ const SideBar = () => {
           <div className="mb-8 flex items-center justify-between">
             <button
               type="button"
-              onClick={() => handleNavigation("/dashboard/")}
+              onClick={() => handleNavigation("/repositories")}
               className="flex items-center gap-3"
             >
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-hunter-green-300 p-1 shadow-sm">
@@ -243,7 +237,7 @@ const SideBar = () => {
                           key={chat.chatCode}
                           type="button"
                           onClick={() =>
-                            handleNavigation(`/dashboard/c/${chat.chatCode}`)
+                            handleNavigation(`/c/${chat.chatCode}`)
                           }
                           className="
                         group flex w-full items-center gap-3
@@ -302,7 +296,7 @@ const SideBar = () => {
                     type="button"
                     onClick={() => {
                       setIsProfileOpen(false);
-                      navigate("/dashboard/settings");
+                      navigate("/settings");
                     }}
                     className="flex group w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-norway-700 transition-colors hover:bg-hunter-green-100 hover:text-norway-950"
                   >

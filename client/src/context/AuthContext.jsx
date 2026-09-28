@@ -240,7 +240,7 @@ export const AuthProvider = ({ children }) => {
       if (res.data.success) {
         setToken(null);
         setUser(null);
-        navigate("/");
+        navigate("/repositories");
         toast.success("Logged out successfully");
       }
     } catch (error) {
@@ -268,7 +268,7 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         setUser(null);
 
-        navigate("/");
+        navigate("/home");
         toast.success("Account deleted successfully");
       }
     } catch (error) {

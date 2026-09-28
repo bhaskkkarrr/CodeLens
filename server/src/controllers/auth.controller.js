@@ -338,7 +338,7 @@ export const connectGithub = async (req, res) => {
     console.log("refresh", refreshToken, "\n\n");
     if (!refreshToken) {
       return res.redirect(
-        `${config.FRONTEND_URL}/dashboard?reason=user_not_logged_in`,
+        `${config.FRONTEND_URL}/?reason=user_not_logged_in`,
       );
     }
 
@@ -350,13 +350,13 @@ export const connectGithub = async (req, res) => {
     console.log("user", user, "\n\n");
     if (!user) {
       return res.redirect(
-        `${config.FRONTEND_URL}/dashboard?reason=invalid_user`,
+        `${config.FRONTEND_URL}/?reason=invalid_user`,
       );
     }
 
     if (user.gitConnected) {
       return res.redirect(
-        `${config.FRONTEND_URL}/dashboard?reason=github_already_connected`,
+        `${config.FRONTEND_URL}/?reason=github_already_connected`,
       );
     }
 
@@ -364,7 +364,7 @@ export const connectGithub = async (req, res) => {
 
     if (!code) {
       return res.redirect(
-        `${config.FRONTEND_URL}/dashboard?reason=missing_code`,
+        `${config.FRONTEND_URL}/?reason=missing_code`,
       );
     }
 
@@ -392,7 +392,7 @@ export const connectGithub = async (req, res) => {
 
     if (!accessToken) {
       return res.redirect(
-        `${config.FRONTEND_URL}/dashboard?reason=token_failed`,
+        `${config.FRONTEND_URL}/?reason=token_failed`,
       );
     }
 
@@ -409,7 +409,7 @@ export const connectGithub = async (req, res) => {
     // Important: githubRefreshToken may not exist
     if (!githubRefreshToken) {
       return res.redirect(
-        `${config.FRONTEND_URL}/dashboard?reason=missing_refresh_token`,
+        `${config.FRONTEND_URL}/?reason=missing_refresh_token`,
       );
     }
     const encryptionResponse = symmetricEncryption(githubRefreshToken);
@@ -431,14 +431,14 @@ export const connectGithub = async (req, res) => {
 
     await user.save();
 
-    return res.redirect(`${config.FRONTEND_URL}/dashboard`);
+    return res.redirect(`${config.FRONTEND_URL}/`);
   } catch (error) {
     console.error(
       "GitHub connection error:",
       error.response?.data || error.message,
     );
 
-    return res.redirect(`${config.FRONTEND_URL}/dashboard?reason=server_error`);
+    return res.redirect(`${config.FRONTEND_URL}/?reason=server_error`);
   }
 };
 

@@ -28,21 +28,21 @@ const Login = () => {
   const handleGoogleSubmit = async () => {
     const res = await googleSubmit();
     if (res.success) {
-      navigate("/dashboard");
+      navigate("/repositories");
     }
   };
 
   const handleGitHubSubmit = async () => {
     const res = await gitHubSubmit();
     if (res.success) {
-      navigate("/dashboard");
+      navigate("/repositories");
     }
   };
 
   const handleEmailLoginSubmit = async ({ email, password }) => {
     const res = await emailLoginSubmit(email, password);
     if (res.success) {
-      navigate("/dashboard");
+      navigate("/repositories");
     }
   };
 

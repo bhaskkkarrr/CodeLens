@@ -54,7 +54,7 @@ export const GithubProvider = ({ children }) => {
       );
       if (res.data.success) {
         toast.success("Repository selected");
-        navigate(`/dashboard/c/${res.data.conversation.chatCode}`)
+        navigate(`/c/${res.data.conversation.chatCode}`)
         setSelectedRepository(repo);
         return {
           success: true,

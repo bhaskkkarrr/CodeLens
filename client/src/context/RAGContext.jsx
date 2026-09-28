@@ -53,7 +53,7 @@ export const RAGProvider = ({ children }) => {
           error?.response ||
           "Something went wrong",
       );
-      navigate("/dashboard");
+      navigate("/repositories");
     }
   };
 

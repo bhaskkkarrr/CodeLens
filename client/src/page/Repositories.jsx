@@ -77,7 +77,7 @@ const Repositories = () => {
 
     toast.error(errorMessages[reason] || "Something went wrong on the server.");
 
-    navigate("/", {
+    navigate("/repositories", {
       replace: true,
     });
   }, [navigate]);

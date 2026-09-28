@@ -9,7 +9,7 @@ const VerifyOTP = () => {
   const handleVerifyOtp = async ({ otp }) => {
     const res = await verifyOTP(otp);
     if (res.success) {
-      navigate("/");
+      navigate("/repositories");
     }
   };
   return (

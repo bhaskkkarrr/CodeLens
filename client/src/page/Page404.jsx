@@ -35,9 +35,9 @@ const Page404 = () => {
             <a
               onClick={() => {
                 if (token) {
-                  navigate("/dashboard");
+                  navigate("/repositories");
                 } else {
-                  navigate("/");
+                  navigate("/home");
                 }
               }}
               className="rounded-md bg-hunter-green-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-hunter-green-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-hunter-green-600"

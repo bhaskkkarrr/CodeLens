@@ -5,7 +5,6 @@ import { Toaster } from "react-hot-toast";
 import VerifyOTP from "./page/VerifyOTP";
 import DashboardLayout from "./components/DashboardLayout";
 import HomeBackground from "./components/HomeBackground";
-import Dashboard from "./page/Dashboard";
 import { useAuth } from "./context/AuthContext";
 import Page404 from "./page/Page404";
 import { FullScreenLoader } from "./components/Loaders";
@@ -26,30 +25,29 @@ const App = () => {
         {/* Home */}
         <Route element={<HomeBackground />}>
           <Route
-            path="/"
-            element={token ? <Navigate to="/dashboard" replace /> : <Home />}
+            path="/home"
+            element={token ? <Navigate to="/repositories" replace /> : <Home />}
           />
 
           <Route
             path="/auth"
-            element={token ? <Navigate to="/dashboard" replace /> : <Login />}
+            element={token ? <Navigate to="/repositories" replace /> : <Login />}
           />
 
           <Route
             path="/verify-otp"
             element={
-              token ? <Navigate to="/dashboard" replace /> : <VerifyOTP />
+              token ? <Navigate to="/repositories" replace /> : <VerifyOTP />
             }
           />
         </Route>
 
         {/* Dashboard */}
         {!isAuthenticating && token && (
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="/dashboard/repositories" element={<Repositories />} />
-            <Route path="/dashboard/c/:conversationId" element={<Conversation />} />
-            <Route path="/dashboard/settings" element={<Settings />} />
+          <Route element={<DashboardLayout />}>
+            <Route path="/repositories" element={<Repositories />} />
+            <Route path="/c/:conversationId" element={<Conversation />} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         )}
 
